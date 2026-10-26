@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+dist/
+.DS_Store
+*.egg-info/
+
+# uploaded product photos (live on a Docker volume in prod)
+backend/media/
+
+# design reference, kept local only (removed from GitHub on 23 Aug)
+design_handoff_tulsi_tiffins_pos/

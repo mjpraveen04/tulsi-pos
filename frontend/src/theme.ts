@@ -1,3 +1,5 @@
+import type { StockMoveReason } from "./types";
+
 /**
  * Design tokens — README Section 7.
  *
@@ -28,10 +30,10 @@ export const theme = {
     modal: "0 20px 60px rgba(0, 0, 0, .28)",
   },
   font: "'Public Sans', system-ui, -apple-system, sans-serif",
-};
+} as const;
 
 /** Ledger activity dot colours, keyed by StockMove.reason. */
-export const moveColor = {
+export const moveColor: Record<StockMoveReason, string> = {
   SALE: theme.color.accent,
   RECEIVE: "oklch(0.6 0.13 152)",
   REMOVE: theme.color.warnInk,

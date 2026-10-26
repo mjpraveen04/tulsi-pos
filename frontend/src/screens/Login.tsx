@@ -1,22 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
+import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
-import { api } from "../api/client";
+import { api, ApiError, errorMessage } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { initials, roleLabel } from "../lib/format";
+import type { UserPublic } from "../types";
 
 export default function Login() {
   const { signIn, status } = useAuth();
   const navigate = useNavigate();
-  const [pickedId, setPickedId] = useState(null);
+  const [pickedId, setPickedId] = useState<number | null>(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const { data: staff = [], isLoading } = useQuery({
+  const { data: staff = [], isLoading } = useQuery<UserPublic[], ApiError>({
     queryKey: ["pin-targets"],
-    queryFn: () => api("/users/pin-targets", { auth: false }),
+    queryFn: () => api<UserPublic[]>("/users/pin-targets", { auth: false }),
   });
 
   // Preselect whoever is first on the list so the PIN field is one tap away.
@@ -29,16 +31,16 @@ export default function Login() {
   const picked = staff.find((member) => member.id === pickedId);
   const canSubmit = Boolean(picked) && pin.length === 4 && !busy;
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || !picked) return;
     setBusy(true);
     setError("");
     try {
       await signIn(picked.id, pin);
       navigate("/register", { replace: true });
     } catch (err) {
-      setError(err.detail || "That didn't work. Try again.");
+      setError(errorMessage(err) || "That didn't work. Try again.");
       setPin("");
     } finally {
       setBusy(false);

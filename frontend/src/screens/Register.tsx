@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
-import { api } from "../api/client";
+import { api, ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import PaymentModal from "../components/PaymentModal";
 import ProductPhoto from "../components/ProductPhoto";
 import { money, plural } from "../lib/format";
+import type { CartLine, MenuOut, Product, ResolvedCartLine } from "../types";
 
 const GST_RATE = 0.05;
 
-function stockBadge(product) {
+function stockBadge(product: Product): { className: string; label: string } {
   if (product.is_sold_out) return { className: " is-out", label: "SOLD OUT" };
   if (product.is_low_stock) return { className: " is-low", label: `${product.stock} left` };
   return { className: "", label: `${product.stock} in stock` };
@@ -18,19 +19,19 @@ function stockBadge(product) {
 export default function Register() {
   const { user } = useAuth();
   const [category, setCategory] = useState("All");
-  const [cart, setCart] = useState([]); // [{ productId, qty }]
+  const [cart, setCart] = useState<CartLine[]>([]);
   const [payOpen, setPayOpen] = useState(false);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<MenuOut, ApiError>({
     queryKey: ["menu"],
-    queryFn: () => api("/register/menu"),
+    queryFn: () => api<MenuOut>("/register/menu"),
     // Stock moves under the cashier's feet; refetch when the tab regains focus.
     refetchOnWindowFocus: true,
   });
 
   const products = data?.products ?? [];
   const byId = useMemo(
-    () => Object.fromEntries(products.map((product) => [product.id, product])),
+    () => new Map(products.map((product) => [product.id, product] as const)),
     [products],
   );
   const categories = useMemo(
@@ -42,9 +43,9 @@ export default function Register() {
 
   // Cart lines resolved against the live menu, so a stock change is reflected
   // immediately in the steppers.
-  const lines = cart
-    .map((line) => ({ ...line, product: byId[line.productId] }))
-    .filter((line) => line.product);
+  const lines: ResolvedCartLine[] = cart
+    .map((line) => ({ ...line, product: byId.get(line.productId) }))
+    .filter((line): line is ResolvedCartLine => Boolean(line.product));
 
   const subtotal = lines.reduce(
     (sum, line) => sum + Number(line.product.price) * line.qty,
@@ -54,7 +55,7 @@ export default function Register() {
   const total = Math.round((subtotal + gst) * 100) / 100;
   const itemCount = lines.reduce((sum, line) => sum + line.qty, 0);
 
-  function addToCart(product) {
+  function addToCart(product: Product) {
     if (product.stock <= 0) return;
     setCart((current) => {
       const existing = current.find((line) => line.productId === product.id);
@@ -67,7 +68,7 @@ export default function Register() {
     });
   }
 
-  function decrement(productId) {
+  function decrement(productId: number) {
     setCart((current) =>
       current.flatMap((line) => {
         if (line.productId !== productId) return [line];
@@ -94,7 +95,7 @@ export default function Register() {
         </div>
 
         {isLoading && <div className="empty">Loading the menu…</div>}
-        {isError && <div className="empty">{error.detail}</div>}
+        {isError && <div className="empty">{error?.detail}</div>}
         {!isLoading && !isError && visible.length === 0 && (
           <div className="empty">
             Nothing on the menu here yet. A manager can add items in Inventory.
@@ -242,8 +243,6 @@ export default function Register() {
       {payOpen && (
         <PaymentModal
           lines={lines}
-          subtotal={subtotal}
-          gst={gst}
           total={total}
           itemCount={itemCount}
           onClose={() => setPayOpen(false)}

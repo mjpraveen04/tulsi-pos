@@ -1,14 +1,28 @@
 import { useQueryClient } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { api, setUnauthorizedHandler, tokenStore } from "../api/client";
+import type { LoginRequest, LoginResponse, UserPublic } from "../types";
 
-const AuthContext = createContext(null);
+export type AuthStatus = "checking" | "signed-in" | "signed-out";
 
-export function AuthProvider({ children }) {
+export interface AuthValue {
+  user: UserPublic | null;
+  status: AuthStatus;
+  signIn: (userId: number, pin: string) => Promise<UserPublic>;
+  signOut: () => void;
+  isManager: boolean;
+}
+
+const AuthContext = createContext<AuthValue | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [user, setUser] = useState(null);
-  const [status, setStatus] = useState(tokenStore.get() ? "checking" : "signed-out");
+  const [user, setUser] = useState<UserPublic | null>(null);
+  const [status, setStatus] = useState<AuthStatus>(
+    tokenStore.get() ? "checking" : "signed-out",
+  );
 
   const signOut = useCallback(() => {
     tokenStore.clear();
@@ -31,7 +45,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!tokenStore.get()) return;
     let cancelled = false;
-    api("/auth/me")
+    api<UserPublic>("/auth/me")
       .then((me) => {
         if (cancelled) return;
         setUser(me);
@@ -48,11 +62,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signIn = useCallback(
-    async (userId, pin) => {
-      const result = await api("/auth/login", {
+    async (userId: number, pin: string): Promise<UserPublic> => {
+      const result = await api<LoginResponse>("/auth/login", {
         method: "POST",
         auth: false,
-        body: { user_id: userId, pin },
+        body: { user_id: userId, pin } satisfies LoginRequest,
       });
       tokenStore.set(result.access_token);
       queryClient.clear();
@@ -63,7 +77,7 @@ export function AuthProvider({ children }) {
     [queryClient],
   );
 
-  const value = useMemo(
+  const value = useMemo<AuthValue>(
     () => ({
       user,
       status,
@@ -77,7 +91,7 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuth(): AuthValue {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside AuthProvider");
   return context;

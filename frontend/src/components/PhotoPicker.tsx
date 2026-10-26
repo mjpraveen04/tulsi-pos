@@ -1,14 +1,23 @@
 import { useRef, useState } from "react";
 
+import type { Product } from "../types";
+
 const ACCEPT = "image/png,image/jpeg,image/webp";
+
+export interface PhotoPickerProps {
+  product: Product;
+  onUpload: (file: File) => void;
+  onRemove: () => void;
+  busy: boolean;
+}
 
 /**
  * The photo cell on an Inventory row: tap to pick an image, tap the × to remove
  * it. The server re-encodes and validates whatever is chosen, so this only has
  * to hint at the accepted types.
  */
-export default function PhotoPicker({ product, onUpload, onRemove, busy }) {
-  const inputRef = useRef(null);
+export default function PhotoPicker({ product, onUpload, onRemove, busy }: PhotoPickerProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [hovered, setHovered] = useState(false);
 
   const hasPhoto = Boolean(product.photo_url);
@@ -55,7 +64,7 @@ export default function PhotoPicker({ product, onUpload, onRemove, busy }) {
       >
         {hasPhoto ? (
           <img
-            src={product.photo_url}
+            src={product.photo_url ?? undefined}
             alt=""
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
           />

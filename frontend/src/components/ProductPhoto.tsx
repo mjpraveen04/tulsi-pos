@@ -1,7 +1,9 @@
 import { useState } from "react";
 
+import type { Product } from "../types";
+
 /** Category tints, so a photo-less menu still reads at a glance. */
-const TINTS = {
+const TINTS: Record<string, string> = {
   Tiffin: "oklch(0.94 0.04 152)",
   Snacks: "oklch(0.94 0.05 70)",
   Beverages: "oklch(0.94 0.04 250)",
@@ -13,14 +15,14 @@ const TINTS = {
  * `public/photos/` and they appear; until then each card falls back to a
  * category-tinted monogram rather than a broken-image icon.
  */
-export default function ProductPhoto({ product }) {
+export default function ProductPhoto({ product }: { product: Product }) {
   const [failed, setFailed] = useState(false);
   const showImage = product.photo_url && !failed;
 
   if (showImage) {
     return (
       <img
-        src={product.photo_url}
+        src={product.photo_url ?? undefined}
         alt=""
         loading="lazy"
         onError={() => setFailed(true)}
