@@ -1,21 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { FormEvent } from "react";
 import { useState } from "react";
 
-import { api } from "../api/client";
+import { api, ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { initials } from "../lib/format";
+import type { UserCreate, UserDetail, UserRole, UserUpdate } from "../types";
+
+interface StaffForm {
+  name: string;
+  role: UserRole;
+  pin: string;
+}
 
 export default function Staff() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [form, setForm] = useState({ name: "", role: "CASHIER", pin: "" });
+  const [form, setForm] = useState<StaffForm>({ name: "", role: "CASHIER", pin: "" });
   const [error, setError] = useState("");
-  const [resetting, setResetting] = useState(null);
+  const [resetting, setResetting] = useState<number | null>(null);
   const [newPin, setNewPin] = useState("");
 
-  const { data: staff = [], isLoading } = useQuery({
+  const { data: staff = [], isLoading } = useQuery<UserDetail[], ApiError>({
     queryKey: ["staff"],
-    queryFn: () => api("/users"),
+    queryFn: () => api<UserDetail[]>("/users"),
   });
 
   function refresh() {
@@ -23,8 +31,8 @@ export default function Staff() {
     queryClient.invalidateQueries({ queryKey: ["pin-targets"] });
   }
 
-  const addUser = useMutation({
-    mutationFn: (body) => api("/users", { method: "POST", body }),
+  const addUser = useMutation<UserDetail, ApiError, UserCreate>({
+    mutationFn: (body) => api<UserDetail>("/users", { method: "POST", body }),
     onSuccess: () => {
       setForm({ name: "", role: "CASHIER", pin: "" });
       setError("");
@@ -33,8 +41,8 @@ export default function Staff() {
     onError: (err) => setError(err.detail),
   });
 
-  const patchUser = useMutation({
-    mutationFn: ({ id, body }) => api(`/users/${id}`, { method: "PATCH", body }),
+  const patchUser = useMutation<UserDetail, ApiError, { id: number; body: UserUpdate }>({
+    mutationFn: ({ id, body }) => api<UserDetail>(`/users/${id}`, { method: "PATCH", body }),
     onSuccess: () => {
       setError("");
       setResetting(null);
@@ -44,8 +52,8 @@ export default function Staff() {
     onError: (err) => setError(err.detail),
   });
 
-  const deactivate = useMutation({
-    mutationFn: (id) => api(`/users/${id}/deactivate`, { method: "PATCH" }),
+  const deactivate = useMutation<UserDetail, ApiError, number>({
+    mutationFn: (id) => api<UserDetail>(`/users/${id}/deactivate`, { method: "PATCH" }),
     onSuccess: () => {
       setError("");
       refresh();
@@ -57,7 +65,7 @@ export default function Staff() {
     (member) => member.role === "MANAGER" && member.is_active,
   ).length;
 
-  function submit(event) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.name.trim()) {
       setError("Enter a name.");
@@ -92,7 +100,7 @@ export default function Staff() {
               <select
                 className="select"
                 value={form.role}
-                onChange={(event) => setForm({ ...form, role: event.target.value })}
+                onChange={(event) => setForm({ ...form, role: event.target.value as UserRole })}
               >
                 <option value="CASHIER">Cashier</option>
                 <option value="MANAGER">Manager</option>
@@ -209,7 +217,10 @@ export default function Staff() {
                       value={member.role}
                       disabled={isLastManager || !member.is_active}
                       onChange={(event) =>
-                        patchUser.mutate({ id: member.id, body: { role: event.target.value } })
+                        patchUser.mutate({
+                          id: member.id,
+                          body: { role: event.target.value as UserRole },
+                        })
                       }
                       aria-label={`Role for ${member.name}`}
                     >

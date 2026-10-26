@@ -1,9 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { api } from "../api/client";
+import { api, ApiError } from "../api/client";
 import { money, plural, timeOfDay } from "../lib/format";
+import type { PaymentIn, PaymentMethod, Receipt, ResolvedCartLine, UpiQr } from "../types";
 import Modal from "./Modal";
+
+type Stage = "method" | "CASH" | "UPI" | "receipt";
+
+export interface PaymentModalProps {
+  lines: ResolvedCartLine[];
+  total: number;
+  itemCount: number;
+  onClose: () => void;
+  onCompleted: () => void;
+}
 
 /**
  * Choose method → cash/UPI → receipt.
@@ -14,28 +25,26 @@ import Modal from "./Modal";
  */
 export default function PaymentModal({
   lines,
-  subtotal,
-  gst,
   total,
   itemCount,
   onClose,
   onCompleted,
-}) {
+}: PaymentModalProps) {
   const queryClient = useQueryClient();
-  const [stage, setStage] = useState("method"); // method | CASH | UPI | receipt
+  const [stage, setStage] = useState<Stage>("method");
   const [received, setReceived] = useState("");
-  const [receipt, setReceipt] = useState(null);
+  const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [error, setError] = useState("");
 
-  const { data: upi } = useQuery({
+  const { data: upi } = useQuery<UpiQr, ApiError>({
     queryKey: ["upi-qr", total],
-    queryFn: () => api(`/register/upi-qr?amount=${total.toFixed(2)}`),
+    queryFn: () => api<UpiQr>(`/register/upi-qr?amount=${total.toFixed(2)}`),
     enabled: stage === "UPI",
   });
 
-  const sale = useMutation({
+  const sale = useMutation<Receipt, ApiError, PaymentIn>({
     mutationFn: (payment) =>
-      api("/bills", {
+      api<Receipt>("/bills", {
         method: "POST",
         body: {
           lines: lines.map((line) => ({ product_id: line.productId, qty: line.qty })),
@@ -60,7 +69,7 @@ export default function PaymentModal({
   const change = tendered - total;
   const cashIsEnough = received !== "" && tendered >= total - 0.001;
 
-  function confirm(method) {
+  function confirm(method: PaymentMethod) {
     setError("");
     sale.mutate(
       method === "CASH"

@@ -1,33 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { api } from "../api/client";
+import { api, ApiError } from "../api/client";
 import Modal from "../components/Modal";
 import { money, plural, timeOfDay } from "../lib/format";
+import type { BillSummary, DailyTotal, IsoDate, Receipt } from "../types";
 
-function today() {
+function today(): IsoDate {
   return new Date().toISOString().slice(0, 10);
 }
 
 export default function Orders() {
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState<IsoDate>(today());
   const [billNo, setBillNo] = useState("");
-  const [openBillNo, setOpenBillNo] = useState(null);
+  const [openBillNo, setOpenBillNo] = useState<number | null>(null);
 
-  const { data: report } = useQuery({
+  const { data: report } = useQuery<DailyTotal, ApiError>({
     queryKey: ["daily-total", date],
-    queryFn: () => api(`/reports/daily-total?date=${date}`),
+    queryFn: () => api<DailyTotal>(`/reports/daily-total?date=${date}`),
   });
 
   const query = billNo.trim() ? `bill_no=${billNo.trim()}` : `date=${date}`;
-  const { data: bills = [], isLoading } = useQuery({
+  const { data: bills = [], isLoading } = useQuery<BillSummary[], ApiError>({
     queryKey: ["bills", query],
-    queryFn: () => api(`/bills?${query}`),
+    queryFn: () => api<BillSummary[]>(`/bills?${query}`),
   });
 
-  const { data: receipt } = useQuery({
+  const { data: receipt } = useQuery<Receipt, ApiError>({
     queryKey: ["bill", openBillNo],
-    queryFn: () => api(`/bills/${openBillNo}`),
+    queryFn: () => api<Receipt>(`/bills/${openBillNo}`),
     enabled: openBillNo !== null,
   });
 

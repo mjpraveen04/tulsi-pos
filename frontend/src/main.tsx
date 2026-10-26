@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
+import { ApiError } from "./api/client";
 import App from "./App";
 import { AuthProvider } from "./auth/AuthContext";
 import "./styles.css";
@@ -12,13 +13,17 @@ const queryClient = new QueryClient({
     queries: {
       // A 401 means the shift token expired — bouncing to Login is the fix,
       // not a retry.
-      retry: (failureCount, error) => error?.status !== 401 && failureCount < 1,
+      retry: (failureCount, error) =>
+        !(error instanceof ApiError && error.status === 401) && failureCount < 1,
       staleTime: 10_000,
     },
   },
 });
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+const container = document.getElementById("root");
+if (!container) throw new Error("#root is missing from index.html");
+
+ReactDOM.createRoot(container).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

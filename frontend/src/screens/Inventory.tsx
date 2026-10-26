@@ -1,34 +1,54 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { FormEvent } from "react";
 import { useState } from "react";
 
-import { api, apiUpload } from "../api/client";
+import { api, ApiError, apiUpload } from "../api/client";
 import PhotoPicker from "../components/PhotoPicker";
 import { money, timeOfDay } from "../lib/format";
 import { moveColor } from "../theme";
+import type { Product, ProductCreate, StockMove, StockMoveReason } from "../types";
 
 const CATEGORIES = ["Tiffin", "Snacks", "Beverages", "Meals"];
 
-const MOVE_TEXT = {
+const MOVE_TEXT: Record<StockMoveReason, (move: StockMove) => string> = {
   OPENING: (move) => `Opening stock · ${move.delta} × ${move.product_name}`,
   RECEIVE: (move) => `Received ${move.delta} × ${move.product_name}`,
   REMOVE: (move) => `Removed ${Math.abs(move.delta)} × ${move.product_name}`,
   SALE: (move) => `Sold ${Math.abs(move.delta)} × ${move.product_name}`,
 };
 
+interface ProductForm {
+  name: string;
+  category: string;
+  price: string;
+  stock: string;
+}
+
+interface AdjustVars {
+  id: number;
+  delta: number;
+  reason: StockMoveReason;
+}
+
 export default function Inventory() {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ name: "", category: "Tiffin", price: "", stock: "" });
-  const [amounts, setAmounts] = useState({});
+  const [form, setForm] = useState<ProductForm>({
+    name: "",
+    category: "Tiffin",
+    price: "",
+    stock: "",
+  });
+  const [amounts, setAmounts] = useState<Record<number, string>>({});
   const [error, setError] = useState("");
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading } = useQuery<Product[], ApiError>({
     queryKey: ["products"],
-    queryFn: () => api("/products"),
+    queryFn: () => api<Product[]>("/products"),
   });
 
-  const { data: moves = [] } = useQuery({
+  const { data: moves = [] } = useQuery<StockMove[], ApiError>({
     queryKey: ["stock-moves"],
-    queryFn: () => api("/products/stock-moves?limit=40"),
+    queryFn: () => api<StockMove[]>("/products/stock-moves?limit=40"),
   });
 
   function refresh() {
@@ -37,8 +57,8 @@ export default function Inventory() {
     queryClient.invalidateQueries({ queryKey: ["menu"] });
   }
 
-  const addProduct = useMutation({
-    mutationFn: (body) => api("/products", { method: "POST", body }),
+  const addProduct = useMutation<Product, ApiError, ProductCreate>({
+    mutationFn: (body) => api<Product>("/products", { method: "POST", body }),
     onSuccess: () => {
       setForm({ name: "", category: form.category, price: "", stock: "" });
       setError("");
@@ -47,9 +67,9 @@ export default function Inventory() {
     onError: (err) => setError(err.detail),
   });
 
-  const adjustStock = useMutation({
+  const adjustStock = useMutation<Product, ApiError, AdjustVars>({
     mutationFn: ({ id, delta, reason }) =>
-      api(`/products/${id}/stock`, { method: "POST", body: { delta, reason } }),
+      api<Product>(`/products/${id}/stock`, { method: "POST", body: { delta, reason } }),
     onSuccess: () => {
       setError("");
       refresh();
@@ -57,8 +77,8 @@ export default function Inventory() {
     onError: (err) => setError(err.detail),
   });
 
-  const uploadPhoto = useMutation({
-    mutationFn: ({ id, file }) => apiUpload(`/products/${id}/photo`, file),
+  const uploadPhoto = useMutation<Product, ApiError, { id: number; file: File }>({
+    mutationFn: ({ id, file }) => apiUpload<Product>(`/products/${id}/photo`, file),
     onSuccess: () => {
       setError("");
       refresh();
@@ -66,8 +86,8 @@ export default function Inventory() {
     onError: (err) => setError(err.detail),
   });
 
-  const removePhoto = useMutation({
-    mutationFn: (id) => api(`/products/${id}/photo`, { method: "DELETE" }),
+  const removePhoto = useMutation<Product, ApiError, number>({
+    mutationFn: (id) => api<Product>(`/products/${id}/photo`, { method: "DELETE" }),
     onSuccess: () => {
       setError("");
       refresh();
@@ -75,8 +95,8 @@ export default function Inventory() {
     onError: (err) => setError(err.detail),
   });
 
-  const archive = useMutation({
-    mutationFn: (id) => api(`/products/${id}/archive`, { method: "PATCH" }),
+  const archive = useMutation<Product, ApiError, number>({
+    mutationFn: (id) => api<Product>(`/products/${id}/archive`, { method: "PATCH" }),
     onSuccess: () => {
       setError("");
       refresh();
@@ -86,13 +106,13 @@ export default function Inventory() {
 
   const lowCount = products.filter((product) => product.is_low_stock || product.is_sold_out).length;
 
-  function amountFor(id) {
+  function amountFor(id: number): number {
     const raw = amounts[id];
     const parsed = Number.parseInt(raw ?? "1", 10);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
   }
 
-  function submitProduct(event) {
+  function submitProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.name.trim()) {
       setError("Give the item a name.");

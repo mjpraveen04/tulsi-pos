@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Tulsi Tiffins">
+  <!-- The same mark as .logo-tile in styles.css: accent-green rounded square,
+       white तु. #418d59 is the sRGB value of the accent token,
+       oklch(0.58 0.11 152); a favicon can't read CSS custom properties.
+       rx 17/64 matches the tile's 9/34 radius ratio.
+
+       The glyph is live text, not a path, so it uses whichever Devanagari face
+       the device has — exactly like the in-app tile, since Public Sans has no
+       Devanagari coverage and already falls back the same way. font-size 44 and
+       y 27.5 are tuned for legibility at 16px and optical centring: the u-matra
+       hangs below the baseline, so centring the em box alone sits it too low. -->
+  <rect width="64" height="64" rx="17" fill="#418d59"/>
+  <text
+    x="32"
+    y="27.5"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="'Devanagari Sangam MN','Kohinoor Devanagari','Nirmala UI','Noto Sans Devanagari',system-ui,sans-serif"
+    font-size="44"
+    font-weight="700"
+    fill="#ffffff"
+  >तु</text>
+</svg>

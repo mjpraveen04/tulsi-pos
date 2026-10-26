@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuth } from "./AuthContext";
 
-function Splash({ children }) {
+function Splash({ children }: { children: ReactNode }) {
   return (
     <div className="login-page">
       <div className="empty">{children}</div>
