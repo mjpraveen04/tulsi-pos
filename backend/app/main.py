@@ -1,17 +1,15 @@
 """FastAPI application: router registration and domain-error mapping."""
 
 import logging
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
 from app.errors import DomainError
-from app.routers import auth, bills, products, register, users
+from app.routers import auth, bills, media, products, register, users
 
 logger = logging.getLogger("tulsi")
 
@@ -34,15 +32,7 @@ app.include_router(users.router)
 app.include_router(products.router)
 app.include_router(register.router)
 app.include_router(bills.router)
-
-# Uploaded product photos. Served read-only from the media volume; every file in
-# here was re-encoded by services/media.py, so nothing user-supplied is executed.
-Path(settings.media_root).mkdir(parents=True, exist_ok=True)
-app.mount(
-    settings.media_url_prefix,
-    StaticFiles(directory=settings.media_root),
-    name="media",
-)
+app.include_router(media.router)
 
 
 @app.exception_handler(DomainError)

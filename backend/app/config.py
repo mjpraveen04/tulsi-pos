@@ -2,11 +2,8 @@
 
 from decimal import Decimal
 from functools import lru_cache
-from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
@@ -21,10 +18,7 @@ class Settings(BaseSettings):
     upi_id: str = "tulsitiffins@upi"
     upi_payee_name: str = "Tulsi Tiffins"
 
-    # Uploaded product photos. Compose overrides this with /srv/media, a Docker
-    # volume, so images survive a rebuild — never inside the image itself. The
-    # default stays repo-local so tests and `uvicorn` run without Docker.
-    media_root: str = str(BACKEND_DIR / "media")
+    # Uploaded product photos are stored in Postgres and served under this prefix.
     media_url_prefix: str = "/media"
     max_photo_bytes: int = 5 * 1024 * 1024
     photo_max_edge: int = 900

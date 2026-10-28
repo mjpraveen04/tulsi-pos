@@ -1,0 +1,49 @@
+# Render Blueprint — the cloud deployment of the same stack docker-compose.yml runs locally.
+#
+#   tulsi-api  Docker web service built from backend/Dockerfile (migrations + seed on start)
+#   tulsi-web  static site built from frontend/; rewrites /api and /media to tulsi-api,
+#              so the browser still sees one origin and needs no CORS (as with nginx locally)
+#   database   PostgreSQL 16 on Neon (free tier does not expire; Render's free Postgres
+#              is deleted after 30 days). Paste its connection string as DATABASE_URL.
+services:
+  - type: web
+    name: tulsi-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # postgresql+psycopg2://USER:PASSWORD@HOST/DB?sslmode=require
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE_HOURS
+        value: "8"
+      - key: UPI_ID
+        value: tulsitiffins@upi
+      - key: UPI_PAYEE_NAME
+        value: Tulsi Tiffins
+      - key: GST_RATE
+        value: "0.05"
+      - key: SEED_ON_START
+        value: "true"
+
+  - type: web
+    name: tulsi-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    routes:
+      # If Render gives the API a different hostname, change these two destinations.
+      - type: rewrite
+        source: /api/*
+        destination: https://tulsi-api.onrender.com/api/*
+      - type: rewrite
+        source: /media/*
+        destination: https://tulsi-api.onrender.com/media/*
+      # The SPA owns its routes — deep links like /orders must serve index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -95,26 +95,22 @@ def set_photo(db: Session, product_id: int, raw: bytes) -> Product:
     """Attach an uploaded photo, replacing whatever was there before (FR-13)."""
     product = get_product(db, product_id)
 
-    new_url = media.save_product_photo(raw)
+    # New photo in, old photo out and the URL swapped — one transaction.
     previous = product.photo_url
-    product.photo_url = new_url
+    product.photo_url = media.save_product_photo(db, product.id, raw)
+    media.delete_product_photo(db, previous)
     db.commit()
     db.refresh(product)
-
-    # Only bin the old file once the new one is safely committed.
-    media.delete_product_photo(previous)
     return product
 
 
 def clear_photo(db: Session, product_id: int) -> Product:
     product = get_product(db, product_id)
 
-    previous = product.photo_url
+    media.delete_product_photo(db, product.photo_url)
     product.photo_url = None
     db.commit()
     db.refresh(product)
-
-    media.delete_product_photo(previous)
     return product
 
 
