@@ -1,0 +1,64 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Package Diagram – Backend layers (building block level 2)
+skinparam packageStyle folder
+skinparam ranksep 38
+top to bottom direction
+
+package "app.main" as main {
+  rectangle "FastAPI app · router registration\nDomainError → HTTP status mapping" as m1
+}
+package "app.routers  (layer 1 – HTTP)" as routers {
+  rectangle "auth · users · products\nregister · bills · media" as r1
+}
+package "app.services  (layer 2 – business logic)" as services {
+  rectangle "billing · payments · inventory · money\norders · users · auth · media" as s1
+}
+package "app.models  (layer 3 – data access)" as models {
+  rectangle "User · Product · ProductPhoto · Bill\nBillLine · Payment · StockMove" as mo1
+}
+package "app.db" as dbp {
+  rectangle "engine · session per request" as d1
+}
+database "PostgreSQL" as pg
+
+package "app.schemas" as schemas {
+  rectangle "Pydantic request /\nresponse models" as sc1
+}
+package "app.security" as security {
+  rectangle "JWT · bcrypt ·\nrole guards" as se1
+}
+package "app.errors" as errors {
+  rectangle "NotFound · Validation\nConflict · Auth errors" as e1
+}
+
+main ..> routers : <<import>>
+routers ..> services : <<use>>
+services ..> models : <<use>>
+models ..> dbp : <<use>>
+dbp ..> pg : SQL
+
+routers ..> schemas : <<use>>
+routers ..> security : <<use>>
+services ..> schemas : <<use>>
+services ..> errors : raises
+main ..> errors : handles
+security ..> models : load user + role
+
+note right of routers
+  Parse, authorise, call one service function.
+  No ORM query in any router (NFR-16);
+  models are imported for type hints only.
+end note
+note right of services
+  The only layer that opens transactions;
+  billing is the only writer of bills (FR-22).
+end note
+
+legend right
+  |= Notation |= Meaning |
+  | folder | package (Python package) |
+  | box inside | modules / classes in that package |
+  | - - -> <<use>> | dependency; layers 1 → 2 → 3\nonly depend downwards |
+endlegend
+@enduml

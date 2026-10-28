@@ -1,0 +1,53 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Sequence Diagram – Ring up a sale (FR-22…27, NFR-04/05)
+autonumber "<b>0."
+
+actor Cashier
+participant "Register screen\n(React)" as UI
+participant "bills router" as R
+participant "security" as S
+participant "billing service" as B
+database "PostgreSQL" as DB
+
+Cashier -> UI : tap items, Charge,\nchoose Cash / UPI
+UI -> R : POST /api/bills {lines, payment}\nAuthorization: Bearer JWT
+R -> S : get_current_user(token)
+S -> DB : SELECT user (role, is_active)
+S --> R : User
+R -> B : create_bill(db, user, payload)
+activate B
+B -> B : merge duplicate lines,\nsort product ids ascending
+B -> DB : BEGIN; SELECT … FROM products\nWHERE id IN (…) ORDER BY id FOR UPDATE
+note right of DB : rows stay locked until\nCOMMIT / ROLLBACK
+alt any line short of stock, archived item or cash < total
+  B -> DB : ROLLBACK
+  B --> R : raise InsufficientStockError / ValidationError
+  R --> UI : 409 / 400 {detail}
+  UI --> Cashier : "Insufficient stock: only 3 left"
+else every line can be served
+  B -> B : subtotal, GST 5 % half-up, total (Decimal)
+  B -> DB : SELECT nextval('bill_no_seq')
+  B -> DB : INSERT bill
+  loop for each line
+    B -> DB : INSERT bill_line (unit_price copied)
+    B -> DB : INSERT stock_move (SALE, −qty)
+    B -> DB : UPDATE products SET stock = stock − qty
+  end
+  B -> DB : INSERT payment (change for cash)
+  B -> DB : COMMIT
+  B --> R : Bill
+  deactivate B
+  R --> UI : 201 Created {receipt}
+  UI --> Cashier : receipt, change due / UPI QR
+end
+
+legend right
+  |= Notation |= Meaning |
+  | → solid arrow | synchronous call |
+  | ⇠ dashed arrow | return message |
+  | alt / else | alternative fragments (only one runs) |
+  | loop | repeated fragment |
+  | bar on lifeline | activation (service is executing) |
+endlegend
+@enduml

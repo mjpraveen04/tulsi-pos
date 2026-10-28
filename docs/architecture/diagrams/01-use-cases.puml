@@ -1,0 +1,43 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Use Case Diagram – System scope and actors
+left to right direction
+
+actor "Cashier" as C
+actor "Manager" as M
+actor "Customer's\nUPI app" as U <<external>>
+M -|> C
+
+rectangle "Tulsi Tiffins POS" {
+  usecase "Log in with PIN\n(FR-01…08)" as UC1
+  usecase "Ring up a sale\n(FR-18…25)" as UC2
+  usecase "Take cash payment\n(FR-26, 27)" as UC3
+  usecase "Take UPI payment\n(FR-28)" as UC4
+  usecase "Check stock level\n(FR-17, 18)" as UC5
+  usecase "Manage menu & photos\n(FR-12…14)" as UC6
+  usecase "Receive / remove stock\n(FR-15, 16)" as UC7
+  usecase "Review orders &\ndaily total (FR-29, 30)" as UC8
+  usecase "Manage staff\n(FR-09…11)" as UC9
+}
+
+C -- UC1
+C -- UC2
+UC2 .> UC5 : <<include>>
+UC3 .> UC2 : <<extend>>
+UC4 .> UC2 : <<extend>>
+UC4 -- U
+M -- UC6
+M -- UC7
+M -- UC8
+M -- UC9
+
+legend right
+  |= Notation |= Meaning |
+  | stick figure | actor (role outside the system) |
+  | ellipse | use case |
+  | rectangle | system boundary |
+  | —▷ (hollow triangle) | generalisation: a Manager can do\neverything a Cashier can |
+  | <<include>> | always part of the base use case |
+  | <<extend>> | optional variant of the base use case |
+endlegend
+@enduml

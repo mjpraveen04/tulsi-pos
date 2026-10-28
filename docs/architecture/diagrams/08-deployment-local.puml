@@ -1,0 +1,35 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Deployment Diagram – Local install (docker compose up)
+
+node "Developer / café PC" <<device>> {
+  node "Docker Engine" <<execution environment>> {
+    node "web" <<container: nginx 1.27-alpine>> as web {
+      artifact "frontend/dist" as dist
+      artifact "nginx.conf\n(/api, /media proxy)" as conf
+    }
+    node "api" <<container: python 3.11-slim>> as api {
+      artifact "backend/app" as app
+      artifact "entrypoint.sh\n(migrate, seed, run)" as ep
+    }
+    node "db" <<container: postgres:16-alpine>> as db {
+      database "tulsi_pos" as tdb
+    }
+    storage "tulsi_db_data\n<<named volume>>" as vol
+  }
+  node "Browser" <<execution environment>> as br
+}
+
+br -- web : HTTP :5173
+web -- api : HTTP api:8000\n(compose network)
+api -- db : SQL db:5432
+db -- vol : mounts
+
+legend right
+  |= Notation |= Meaning |
+  | 3-D box | node (device / container) |
+  | dog-ear box | artifact |
+  | —— | communication path |
+  | rounded oval | persistent storage (Docker volume) |
+endlegend
+@enduml

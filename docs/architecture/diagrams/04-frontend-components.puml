@@ -1,0 +1,53 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Component Diagram – Front end (building block level 2)
+skinparam componentStyle uml2
+
+component "React SPA" as spa {
+  component "App router\n(react-router-dom)" as router
+  component "Auth guards\nRequireAuth · RequireManager" as guards
+  component "AuthContext\n(token, current user)" as auth
+  package "screens" {
+    component "Login" as login
+    component "Register" as reg
+    component "Inventory" as inv
+    component "Orders" as ord
+    component "Staff" as staff
+  }
+  package "components" {
+    component "PaymentModal" as pay
+    component "PhotoPicker / ProductPhoto" as photo
+    component "TopBar · Modal" as ui
+  }
+  component "Server-state cache\n(TanStack Query)" as cache
+  component "API client\napi/client.ts" as client
+  artifact "types.ts\n(mirrors Pydantic schemas)" as types
+}
+interface "REST /api" as rest
+
+router ..> guards
+guards ..> auth
+router ..> login
+router ..> reg
+router ..> inv
+router ..> ord
+router ..> staff
+reg ..> pay
+inv ..> photo
+login ..> auth
+reg ..> cache
+inv ..> cache
+ord ..> cache
+staff ..> cache
+cache ..> client
+client ..> types
+client ..> rest : <<use>>
+
+legend right
+  |= Notation |= Meaning |
+  | component box | component |
+  | folder | package (source folder) |
+  | dog-ear box | artifact (source file) |
+  | - - -> | dependency |
+endlegend
+@enduml
