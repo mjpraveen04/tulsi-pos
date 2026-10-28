@@ -39,10 +39,10 @@ services:
       # If Render gives the API a different hostname, change these two destinations.
       - type: rewrite
         source: /api/*
-        destination: https://tulsi-api.onrender.com/api/*
+        destination: https://tulsi-api-4343.onrender.com/api/*
       - type: rewrite
         source: /media/*
-        destination: https://tulsi-api.onrender.com/media/*
+        destination: https://tulsi-api-4343.onrender.com/media/*
       # The SPA owns its routes — deep links like /orders must serve index.html.
       - type: rewrite
         source: /*
