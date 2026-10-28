@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tulsi Tiffins POS – Installation Manual v1.0.0</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  @page :first { margin: 0; }
+  :root {
+    --green: #418d59; --green-dark: #2d6a41; --green-soft: #e7f2ea; --green-line: #b9d8c3;
+    --saffron: #d98a1f; --saffron-soft: #fcefdc; --ink: #1f2421; --muted: #5d645f;
+    --rule: #d9ddd9; --paper: #faf9f5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+         font-size: 10.2pt; line-height: 1.5; }
+  p { margin: 0 0 7pt; text-align: justify; hyphens: auto; }
+  h1 { font-size: 19pt; margin: 0 0 4pt; color: var(--green-dark); letter-spacing: -0.2px; }
+  h2 { font-size: 14pt; color: var(--green-dark); margin: 0 0 8pt; padding-bottom: 4pt;
+       border-bottom: 2px solid var(--green); break-after: avoid; }
+  h2 .no { color: var(--saffron); margin-right: 6pt; }
+  h3 { font-size: 11.2pt; margin: 12pt 0 5pt; break-after: avoid; }
+  section.chap { break-before: page; }
+  ul { margin: 0 0 7pt; padding-left: 15pt; } li { margin-bottom: 2.5pt; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.6pt; background: var(--paper);
+         padding: 0 2px; border-radius: 2px; }
+  b { font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 9pt; font-size: 8.7pt; line-height: 1.35;
+          break-inside: auto; }
+  th { background: var(--green); color: #fff; text-align: left; font-weight: 600; padding: 4pt 6pt; vertical-align: bottom; }
+  td { padding: 3.5pt 6pt; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr { break-inside: avoid; }
+  tbody tr:nth-child(even) td { background: var(--paper); }
+  td.c, th.c { text-align: center; }
+  .tcap { font-size: 8.6pt; color: var(--muted); margin: 2pt 0 2pt; font-weight: 600; }
+  figure { margin: 6pt 0 12pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--rule); border-radius: 6px; padding: 6pt; background: #fff; }
+  figcaption { font-size: 8.6pt; color: var(--muted); margin-top: 4pt; text-align: center; }
+  figcaption b { color: var(--ink); }
+  .notation { display: inline-block; font-size: 7.8pt; font-weight: 600; color: var(--green-dark);
+              background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 99px;
+              padding: 0 7px; margin-left: 4px; }
+  .box { border: 1px solid var(--rule); border-left: 4px solid var(--green); background: var(--paper);
+         border-radius: 0 6px 6px 0; padding: 7pt 10pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  .box.warn { border-left-color: var(--saffron); background: #fffaf2; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .k { font-size: 8pt; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); }
+  .y { color: var(--green-dark); font-weight: 700; }
+  .p { color: #9a5a00; font-weight: 700; }
+  .n { color: #a33; font-weight: 700; }
+  .chosen td { background: var(--green-soft) !important; }
+  .chosen td:first-child { font-weight: 700; }
+  /* cover */
+  .cover { width: 210mm; height: 296mm; position: relative; break-after: page; overflow: hidden; }
+  .cover .band { position: absolute; right: 0; top: 0; width: 68mm; height: 100%; background: var(--green); }
+  .cover .logo { position: absolute; right: 13mm; top: 58mm; }
+  .cover .meta { position: absolute; left: 22mm; bottom: 24mm; width: 112mm; font-size: 9.2pt; }
+  .cover .meta td { border: 0; padding: 2pt 0; background: none !important; }
+  .cover .meta td:first-child { color: var(--muted); width: 34mm; }
+  .toc { columns: 1; font-size: 10pt; }
+  .toc div { display: flex; border-bottom: 1px dotted var(--rule); padding: 3pt 0; }
+  .toc div span:first-child { width: 10mm; color: var(--saffron); font-weight: 700; }
+
+  pre { font-family: Menlo, Consolas, monospace; font-size: 8.3pt; line-height: 1.45; background: #1f2421; color: #eef2ee;
+        border-radius: 6px; padding: 7pt 10pt; margin: 4pt 0 8pt; white-space: pre-wrap; break-inside: avoid; }
+  ol.steps { padding-left: 17pt; margin: 0 0 8pt; } ol.steps > li { margin-bottom: 6pt; }
+  section.chap table { table-layout: fixed; }
+  th code { background: transparent; color: #fff; }
+  td code { overflow-wrap: break-word; }
+  section.chap { break-before: auto; margin-top: 16pt; }
+  section.chap:first-of-type { break-before: page; margin-top: 0; }
+  h2 { break-after: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="band"></div>
+  <svg class="logo" width="150" height="150" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="17" fill="#fff"/>
+    <text x="32" y="27.5" text-anchor="middle" dominant-baseline="central" font-family="'Devanagari Sangam MN','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif" font-size="44" font-weight="700" fill="#418d59">तु</text>
+  </svg>
+  <div style="position:absolute;left:22mm;top:48mm;width:112mm">
+    <div class="k">IU · Project: Software Engineering (CSEMCSPSE01) · Portfolio Part 3</div>
+    <div style="font-size:30pt;font-weight:600;line-height:1.1;margin-top:14mm;letter-spacing:-0.6px">Tulsi Tiffins POS</div>
+    <div style="font-size:15pt;color:var(--muted);margin-top:4mm;line-height:1.3">Installation and Operating Manual</div>
+    <div style="width:22mm;height:3px;background:var(--saffron);margin:10mm 0 8mm"></div>
+    <div style="font-size:11pt;line-height:1.55">How to open the hosted application, install it on your own computer with one Docker command, run the tests, deploy it to the cloud – and how to use it once it runs.</div>
+  </div>
+  <table class="meta">
+    <tr><td>Author</td><td><b>Praveen Mysore Jagannath</b> · 10251728</td></tr>
+    <tr><td>Tutor</td><td>Niknejad, Naghmeh</td></tr>
+    <tr><td>Document version</td><td><b>1.0.0</b> (matches software release v1.0.0)</td></tr>
+    <tr><td>Date</td><td>28 October 2026</td></tr>
+    <tr><td>Source code</td><td>github.com/mjpraveen04/tulsi-pos</td></tr>
+    <tr><td>Live application</td><td>https://tulsi-web.onrender.com</td></tr>
+  </table>
+</div>
+
+<!-- ============ TOC ============ -->
+<h1>Contents</h1>
+<div class="toc" style="margin:8pt 0 16pt">
+  <div><span>1</span>Quick reference</div>
+  <div><span>2</span>Option A – use the hosted application</div>
+  <div><span>3</span>Option B – install locally with Docker Compose</div>
+  <div><span>4</span>Configuration</div>
+  <div><span>5</span>Running the automated tests</div>
+  <div><span>6</span>Developer mode without Docker</div>
+  <div><span>7</span>Cloud deployment (Render + Neon)</div>
+  <div><span>8</span>Using the application – first steps</div>
+  <div><span>9</span>Troubleshooting</div>
+  <div><span>10</span>Stopping, resetting and uninstalling</div>
+</div>
+
+<div class="box">
+  <div class="k" style="margin-bottom:3pt">Verified on 28 October 2026</div>
+  <p>Every command in Sections 3, 5 and 6 was run on macOS 26 with Docker Desktop on that date. Section 3 was run against a <b>fresh clone from GitHub</b> (commit 90c36c1) in an empty folder, built with <code>--no-cache</code> and started on an empty database: images built in 38 s (base images already downloaded), the API was ready about 5 s after start, and a cashier sale returned bill 1042 for ₹84.00 with ₹416.00 change. The hosted application in Section 2 was smoke-tested on the same day.</p>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="chap">
+<h2><span class="no">1</span>Quick reference</h2>
+<table>
+  <thead><tr><th style="width:30%">What</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Hosted application</td><td><b>https://tulsi-web.onrender.com</b></td></tr>
+    <tr><td>Source code</td><td>https://github.com/mjpraveen04/tulsi-pos (branch <code>main</code>, tag <code>v1.0.0</code>)</td></tr>
+    <tr><td>Local install</td><td><code>docker compose up --build</code> in the repository folder, then http://localhost:5173</td></tr>
+    <tr><td>API documentation (local)</td><td>http://localhost:8000/docs (Swagger UI, generated from the code)</td></tr>
+    <tr><td>Run the tests</td><td>Section 5 – 120 tests against PostgreSQL, about 2 minutes</td></tr>
+  </tbody>
+</table>
+
+<h3>1.1 Login data</h3>
+<p>The same three demo accounts exist in the hosted application and in every local installation; they are created automatically on first start. On the login screen, tap a name, then enter the four-digit PIN.</p>
+<table>
+  <thead><tr><th>Name</th><th>Role</th><th>PIN</th><th>Can use</th></tr></thead>
+  <tbody>
+    <tr><td><b>Anita R.</b></td><td>Manager</td><td><code>1234</code></td><td>Register, Inventory, Orders, Staff</td></tr>
+    <tr><td><b>Ravi K.</b></td><td>Cashier</td><td><code>1111</code></td><td>Register, own bill history</td></tr>
+    <tr><td><b>Priya M.</b></td><td>Cashier</td><td><code>2222</code></td><td>Register, own bill history</td></tr>
+  </tbody>
+</table>
+<div class="box warn"><p><b>Before real use</b>, change or deactivate these demo accounts and set a strong <code>JWT_SECRET</code> (Section 4). The demo PINs are public in this manual and in the repository.</p></div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="chap">
+<h2><span class="no">2</span>Option A – use the hosted application</h2>
+<p>No installation is needed. Open <b>https://tulsi-web.onrender.com</b> in a current browser (Chrome, Edge, Firefox or Safari) on a laptop or tablet and sign in with one of the accounts in Section 1.1.</p>
+<div class="box warn">
+  <p><b>The first request can take 30–60 seconds.</b> The application runs on free hosting plans: the API goes to sleep after 15 minutes without traffic and is woken by the next request. If the login screen shows no names or a loading message, wait a minute and reload the page. After that, the application responds normally.</p>
+</div>
+<p>The hosted instance runs exactly the code of the <code>main</code> branch: Render rebuilds it automatically on every push. It uses its own PostgreSQL database on Neon, so sales and stock changes made there are stored permanently and are visible to everyone who uses the demo. Section 7 describes how this deployment is set up.</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="chap">
+<h2><span class="no">3</span>Option B – install locally with Docker Compose</h2>
+<p>The whole system – database, API and web front end – runs as three containers started with one command (NFR-14). Nothing else needs to be installed on the computer.</p>
+
+<h3>3.1 Prerequisites</h3>
+<table>
+  <thead><tr><th style="width:30%">Requirement</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td>Docker with Compose v2</td><td>Docker Desktop 4.x (Windows, macOS) or Docker Engine 24+ with the Compose plugin (Linux). Check with <code>docker compose version</code>.</td></tr>
+    <tr><td>Memory and disk</td><td>About 2 GB free RAM for Docker and 1.5 GB disk for the images.</td></tr>
+    <tr><td>Free ports</td><td>5173 (web), 8000 (API), 5432 (database). Other ports can be chosen (Section 3.4).</td></tr>
+    <tr><td>Internet access</td><td>Only for the first build, to download the base images and packages.</td></tr>
+    <tr><td>Git (optional)</td><td>To clone the repository. Alternatively use the code zip from the submission or GitHub’s <i>Download ZIP</i>.</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Steps</h3>
+<ol class="steps">
+  <li><b>Get the code.</b>
+<pre>git clone https://github.com/mjpraveen04/tulsi-pos.git
+cd tulsi-pos</pre>
+  or unzip <code>MysoreJagannath-Praveen_10251728_PSE_Submission_Code.zip</code> and open a terminal in the unzipped folder.</li>
+  <li><b>Start Docker Desktop</b> and wait until it reports that it is running.</li>
+  <li><b>Optional – create a configuration file.</b> Every setting has a safe default, so this step can be skipped.
+<pre>cp .env.example .env        # Windows PowerShell: copy .env.example .env</pre></li>
+  <li><b>Build and start</b> all three containers:
+<pre>docker compose up --build</pre>
+  The first build downloads base images and takes a few minutes; later starts take seconds. The API log shows these three lines when it is ready:
+<pre>[entrypoint] applying Alembic migrations...
+[entrypoint] seeding demo data (idempotent)...
+[entrypoint] starting uvicorn...</pre></li>
+  <li><b>Open http://localhost:5173</b> and sign in, for example as Anita R. with PIN <code>1234</code>.</li>
+</ol>
+<p>To run the stack in the background instead, use <code>docker compose up -d --build</code>; <code>docker compose logs -f api</code> then shows the API log.</p>
+
+<h3>3.3 What starts</h3>
+<table>
+  <thead><tr><th style="width:12%">Service</th><th style="width:26%">Image</th><th style="width:22%">Address on your computer</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td><code>db</code></td><td>postgres:16-alpine</td><td>localhost:5432</td><td>PostgreSQL database; data kept in the Docker volume <code>tulsi_db_data</code></td></tr>
+    <tr><td><code>api</code></td><td>built from <code>backend/Dockerfile</code> (Python 3.11)</td><td>http://localhost:8000</td><td>FastAPI service. On every start it applies the Alembic migrations, adds the demo staff and menu if they are missing, then starts uvicorn</td></tr>
+    <tr><td><code>web</code></td><td>built from <code>frontend/Dockerfile</code> (Node 20 build, nginx 1.27)</td><td>http://localhost:5173</td><td>Serves the React application and forwards <code>/api</code> and <code>/media</code> to the API, so the browser talks to one address</td></tr>
+  </tbody>
+</table>
+
+<h3>3.4 Check that it works</h3>
+<pre>curl http://localhost:5173/api/health          # {"status":"ok"}
+curl http://localhost:5173/api/users/pin-targets # the three demo staff
+curl -i http://localhost:5173/api/register/menu  # 401 – a token is required</pre>
+<p>In the browser: sign in as Ravi K. (<code>1111</code>), tap <i>Filter Coffee</i> twice, choose <b>Charge ₹84.00 → Cash</b>, enter <code>500</code> and confirm. The receipt shows bill 1042 and change of ₹416.00; the stock badge of the item drops by two.</p>
+
+<h3>3.5 If a port is already in use</h3>
+<p>Choose other host ports in <code>.env</code> or directly on the command line. The containers talk to each other inside Docker, so only the published ports change:</p>
+<pre>WEB_PORT=5180 API_PORT=8010 DB_PORT=5440 docker compose up --build</pre>
+<p>The application is then at http://localhost:5180. A local PostgreSQL installation is the most common cause of a conflict on port 5432.</p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="chap">
+<h2><span class="no">4</span>Configuration</h2>
+<p>All settings come from environment variables. Docker Compose reads them from a <code>.env</code> file in the repository folder (template: <code>.env.example</code>); every variable has a default in <code>docker-compose.yml</code>. Nothing is configured in the code.</p>
+<table>
+  <thead><tr><th style="width:24%">Variable</th><th style="width:30%">Default</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>DATABASE_URL</code></td><td><code>postgresql+psycopg2://tulsi:tulsi@db:5432/tulsi_pos</code></td><td>Database connection used by the API. Host <code>db</code> is the Compose service name.</td></tr>
+    <tr><td><code>POSTGRES_USER</code> / <code>_PASSWORD</code> / <code>_DB</code></td><td><code>tulsi</code> / <code>tulsi</code> / <code>tulsi_pos</code></td><td>Credentials the database container is created with. If changed, change <code>DATABASE_URL</code> to match.</td></tr>
+    <tr><td><code>JWT_SECRET</code></td><td><code>dev-secret-change-me</code></td><td>Key that signs login tokens. <b>Set a long random value for any real use</b>, e.g. <code>openssl rand -hex 32</code>.</td></tr>
+    <tr><td><code>JWT_EXPIRE_HOURS</code></td><td><code>8</code></td><td>Lifetime of a login – one shift (NFR-08).</td></tr>
+    <tr><td><code>UPI_ID</code> / <code>UPI_PAYEE_NAME</code></td><td><code>tulsitiffins@upi</code> / <code>Tulsi Tiffins</code></td><td>Encoded in the UPI QR code shown at payment. Set the café’s real UPI ID.</td></tr>
+    <tr><td><code>GST_RATE</code></td><td><code>0.05</code></td><td>GST applied to every bill.</td></tr>
+    <tr><td><code>SEED_ON_START</code></td><td><code>true</code></td><td>Adds the demo staff and menu if missing. Existing data is never overwritten.</td></tr>
+    <tr><td><code>WEB_PORT</code> / <code>API_PORT</code> / <code>DB_PORT</code></td><td><code>5173</code> / <code>8000</code> / <code>5432</code></td><td>Ports published on the host.</td></tr>
+  </tbody>
+</table>
+<p>After changing <code>.env</code>, restart with <code>docker compose up -d</code>. Product photos are stored in the database, so no extra file storage needs to be configured or backed up.</p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="chap">
+<h2><span class="no">5</span>Running the automated tests</h2>
+<p>The 120 backend tests run against a real PostgreSQL database, because the concurrency and rollback release gates need real row locks and a real <code>CHECK</code> constraint. The test setup creates a separate database <code>tulsi_pos_test</code> and migrates it with Alembic; the application’s data is not touched.</p>
+<p>Additional prerequisite: <b>Python 3.11</b> (3.12 also works).</p>
+<pre>docker compose up -d db                       # the database container is enough
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt     # Windows: .venv\Scripts\pip ...
+PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m pytest -q</pre>
+<p>Expected result: <code>120 passed</code> in about two minutes. Only the six release gates: add <code>-m gate</code> (about 4 s).</p>
+<div class="box warn"><p><b>Two things that make every test fail with an error:</b> (1) the virtual environment is not on <code>PATH</code> – the test setup calls the <code>alembic</code> command and reports <code>FileNotFoundError: alembic</code>; (2) the database runs on another port than 5432. In that case pass its address:<br><code>TEST_DATABASE_URL="postgresql+psycopg2://tulsi:tulsi@localhost:5440/tulsi_pos_test"</code> before the command.</p></div>
+<p>The front end has no unit tests (TD-02); its correctness against the API is checked by the TypeScript compiler. <code>npm run build</code> in <code>frontend/</code> type-checks every file first and fails on any mismatch with the API types.</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="chap">
+<h2><span class="no">6</span>Developer mode without Docker</h2>
+<p>For changing the code, the API and the front end can run directly on the computer with automatic reload. The database still runs in Docker. Additional prerequisites: Python 3.11 and Node.js 20 or newer.</p>
+<pre># terminal 1 – database
+docker compose up -d db
+
+# terminal 2 – API on http://localhost:8000
+cd backend
+.venv/bin/alembic upgrade head
+DATABASE_URL="postgresql+psycopg2://tulsi:tulsi@localhost:5432/tulsi_pos" \
+  .venv/bin/uvicorn app.main:app --reload
+
+# terminal 3 – front end on http://localhost:5173
+cd frontend
+npm install
+npm run dev</pre>
+<p>The Vite development server forwards <code>/api</code> and <code>/media</code> to http://localhost:8000; set <code>VITE_API_TARGET</code> to use another address. Stop the Docker <code>web</code> and <code>api</code> containers first if they occupy ports 5173 and 8000. The <code>alembic</code> and <code>uvicorn</code> commands also need <code>DATABASE_URL</code> when the database is not on port 5432.</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="chap">
+<h2><span class="no">7</span>Cloud deployment (Render + Neon)</h2>
+<p>The hosted application is deployed from the file <code>render.yaml</code> (a Render <i>Blueprint</i>) in the repository. It defines two services built from the same Dockerfile and front end as the local installation; the database is a free PostgreSQL project on Neon, because Render’s free database is deleted after 30 days.</p>
+<table>
+  <thead><tr><th style="width:18%">Part</th><th style="width:26%">Provider and plan</th><th>Configuration</th></tr></thead>
+  <tbody>
+    <tr><td><code>tulsi-api</code></td><td>Render web service, Docker, free</td><td>Built from <code>backend/Dockerfile</code>; health check <code>/api/health</code>; environment variables from <code>render.yaml</code>; <code>JWT_SECRET</code> generated by Render; <code>DATABASE_URL</code> entered by hand</td></tr>
+    <tr><td><code>tulsi-web</code></td><td>Render static site, free</td><td><code>npm ci &amp;&amp; npm run build</code>; publishes <code>dist/</code>; rewrites <code>/api/*</code> and <code>/media/*</code> to the API and all other paths to <code>index.html</code></td></tr>
+    <tr><td>Database</td><td>Neon PostgreSQL 18, free, EU region</td><td>Connection string with <code>sslmode=require</code></td></tr>
+  </tbody>
+</table>
+<h3>7.1 Deploying a new copy</h3>
+<ol class="steps">
+  <li>Fork or push the repository to your own GitHub account.</li>
+  <li>At neon.tech create a project and copy the connection string. Change its start from <code>postgresql://</code> to <code>postgresql+psycopg2://</code> and keep <code>?sslmode=require</code> at the end.</li>
+  <li>At render.com choose <b>New → Blueprint</b>, connect the repository and paste the string as <code>DATABASE_URL</code> when asked. Render creates both services and starts the first build.</li>
+  <li>Render assigns the API a host name such as <code>tulsi-api-xxxx.onrender.com</code>. If it differs from the one in <code>render.yaml</code>, change the two rewrite destinations there and push the change.</li>
+  <li>Open the address of the <code>tulsi-web</code> service. Migrations and demo data are applied by the API on its first start.</li>
+</ol>
+<p>Every later push to <code>main</code> redeploys both services automatically. Free-plan limits: the API sleeps after 15 minutes without traffic (first request 30–60 s).</p>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="chap">
+<h2><span class="no">8</span>Using the application – first steps</h2>
+<figure>
+  <img src="img/login.jpg" style="width:72%">
+  <figcaption><b>Figure 1:</b> Login – tap a name, then enter the four-digit PIN <span class="notation">screen capture</span></figcaption>
+</figure>
+<h3>8.1 Sell (cashier or manager)</h3>
+<ol class="steps">
+  <li>On the <b>Register</b>, filter by category if needed and tap a photo card to add the item to the order. Tap again or use + / − to change the quantity. A card cannot be added beyond its stock; sold-out items are greyed out.</li>
+  <li>The order panel shows subtotal, 5 % GST and total. Tap <b>Charge</b>.</li>
+  <li><b>Cash:</b> enter the amount received; the change is shown, and <i>Payment received</i> becomes available once the amount covers the total. <b>UPI:</b> the customer scans the QR code; after checking their phone, tap <i>Mark paid</i>.</li>
+  <li>The receipt shows the bill number and can be printed. Stock is reduced at the same moment.</li>
+</ol>
+<figure>
+  <img src="img/register_cart.jpg" style="width:86%">
+  <figcaption><b>Figure 2:</b> Register with photo cards, stock badges and the current order <span class="notation">screen capture</span></figcaption>
+</figure>
+<h3>8.2 Manage (manager only)</h3>
+<ul>
+  <li><b>Inventory:</b> add or edit products (name, category, price, reorder level, photo); <i>Receive</i> or <i>Remove</i> stock – every change appears in the stock activity list with the user and time; archive products that are no longer sold.</li>
+  <li><b>Orders:</b> search bills by date or bill number, open a receipt, and see the day’s total.</li>
+  <li><b>Staff:</b> add staff with name, role and PIN, reset a PIN, or deactivate an account. The last active manager cannot be deactivated.</li>
+</ul>
+<figure>
+  <img src="img/inventory.jpg" style="width:86%">
+  <figcaption><b>Figure 3:</b> Inventory with stock levels and the stock activity ledger <span class="notation">screen capture</span></figcaption>
+</figure>
+<p>Cashiers see only the Register and their bill history. The server checks the role of every request, so a cashier cannot reach manager functions even by calling the API directly (HTTP 403).</p>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="chap">
+<h2><span class="no">9</span>Troubleshooting</h2>
+<table>
+  <thead><tr><th style="width:32%">Symptom</th><th style="width:28%">Cause</th><th>Solution</th></tr></thead>
+  <tbody>
+    <tr><td>Hosted app: login screen empty or loading for a long time</td><td>The free API is waking up</td><td>Wait 30–60 s and reload the page.</td></tr>
+    <tr><td><code>Cannot connect to the Docker daemon</code></td><td>Docker Desktop is not running</td><td>Start Docker Desktop and wait until it is ready.</td></tr>
+    <tr><td><code>Bind for 0.0.0.0:5432 failed: port is already allocated</code></td><td>Another database or container uses the port</td><td>Choose other ports (Section 3.5); <code>docker ps</code> shows what is running.</td></tr>
+    <tr><td>Browser shows “502 Bad Gateway” right after start</td><td>The API is still migrating</td><td>Wait a few seconds; check <code>docker compose logs api</code> for <i>starting uvicorn</i>.</td></tr>
+    <tr><td>“Incorrect PIN. Please try again.”</td><td>Wrong account selected, or demo PIN was changed</td><td>Select the name first, then the PIN from Section 1.1. To restore the demo data locally, reset the database (Section 10).</td></tr>
+    <tr><td>“Insufficient stock: only N left”</td><td>The order asks for more than is in stock – expected behaviour</td><td>Reduce the quantity, or receive stock as a manager.</td></tr>
+    <tr><td>The app suddenly returns to the login screen</td><td>The 8-hour login has expired, or the account was deactivated</td><td>Log in again.</td></tr>
+    <tr><td>“Can’t reach the server. Check the connection and try again.”</td><td>Network down, API container stopped, or hosted API waking up</td><td>Check <code>docker compose ps</code> locally; for the hosted app wait a minute and retry.</td></tr>
+    <tr><td>All tests fail with <code>FileNotFoundError: alembic</code></td><td>Virtual environment not on <code>PATH</code></td><td>Use the exact command in Section 5.</td></tr>
+    <tr><td>All tests fail with <code>connection refused</code></td><td>Database not running or on another port</td><td><code>docker compose up -d db</code>; set <code>TEST_DATABASE_URL</code>.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="chap">
+<h2><span class="no">10</span>Stopping, resetting and uninstalling</h2>
+<table>
+  <thead><tr><th style="width:34%">Goal</th><th style="width:36%">Command (in the repository folder)</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr><td>Stop the application</td><td><code>docker compose down</code> (or Ctrl + C)</td><td>Containers stop; all data is kept.</td></tr>
+    <tr><td>Start again</td><td><code>docker compose up -d</code></td><td>Starts in seconds with the existing data.</td></tr>
+    <tr><td>Update to a newer version</td><td><code>git pull</code>, then <code>docker compose up -d --build</code></td><td>Rebuilds images; new migrations are applied automatically; data is kept.</td></tr>
+    <tr><td>Back up the data</td><td><code>docker compose exec db pg_dump -U tulsi tulsi_pos &gt; backup.sql</code></td><td>One SQL file with all sales, stock, staff and photos.</td></tr>
+    <tr><td>Reset to the demo state</td><td><code>docker compose down -v</code>, then <code>docker compose up -d</code></td><td><b>Deletes all data</b>; the next start recreates the demo staff and menu.</td></tr>
+    <tr><td>Uninstall completely</td><td><code>docker compose down -v --rmi local</code>, then delete the folder</td><td>Removes containers, the data volume and the built images.</td></tr>
+  </tbody>
+</table>
+</section>
+
+</body>
+</html>

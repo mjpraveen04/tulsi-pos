@@ -9,7 +9,7 @@ dist/
 .DS_Store
 *.egg-info/
 
-# uploaded product photos (live on a Docker volume in prod)
+# leftover local photo folder from before photos moved into PostgreSQL
 backend/media/
 
 # design reference, kept local only (removed from GitHub on 23 Aug)
