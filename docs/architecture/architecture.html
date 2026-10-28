@@ -476,6 +476,8 @@
     <tr><td>TD-06</td><td>Token revocation only via deactivation</td><td>NFR-08</td><td>Logout removes the token in the browser; a stolen token stays valid until expiry unless the user is deactivated. Remedy: a short-lived token with a refresh token, or a deny list.</td></tr>
     <tr><td>TD-07</td><td>Staff names visible on the login screen</td><td>Privacy</td><td>Accepted trade-off for tap-to-select login on a shared till. Remedy if needed: a device-pairing code before the name list is shown.</td></tr>
     <tr><td>TD-08</td><td>PostgreSQL version differs between local (16) and cloud (18)</td><td>NFR-14</td><td>The suite passes on both; a future breaking change could appear on only one. Remedy: pin both to the same major version.</td></tr>
+    <tr><td>TD-09</td><td>Basket preview in the browser uses JavaScript numbers</td><td>TR-04 (display only)</td><td>Subtotal, GST and total on the Register are previewed with <code>Math.round</code>; the stored bill and receipt are always computed by the server in <code>Decimal</code>. A one-paisa difference could only make the cash check reject a sale with a clear 400 message. Remedy: integer-paise arithmetic in the client.</td></tr>
+    <tr><td>TD-10</td><td>Cash sale needs the tendered amount typed in</td><td>NFR-12</td><td>A UPI sale takes 4 taps (item, Charge, UPI, Mark paid); a cash sale adds typing the amount received. Remedy: quick-amount buttons (exact, ₹100, ₹200, ₹500).</td></tr>
   </tbody>
 </table>
 <h3>Remaining risks</h3>

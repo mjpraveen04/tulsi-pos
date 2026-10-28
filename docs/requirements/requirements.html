@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tulsi Tiffins POS – Requirements and Traceability v1.0.0</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  @page :first { margin: 0; }
+  :root {
+    --green: #418d59; --green-dark: #2d6a41; --green-soft: #e7f2ea; --green-line: #b9d8c3;
+    --saffron: #d98a1f; --saffron-soft: #fcefdc; --ink: #1f2421; --muted: #5d645f;
+    --rule: #d9ddd9; --paper: #faf9f5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+         font-size: 10.2pt; line-height: 1.5; }
+  p { margin: 0 0 7pt; text-align: justify; hyphens: auto; }
+  h1 { font-size: 19pt; margin: 0 0 4pt; color: var(--green-dark); letter-spacing: -0.2px; }
+  h2 { font-size: 14pt; color: var(--green-dark); margin: 0 0 8pt; padding-bottom: 4pt;
+       border-bottom: 2px solid var(--green); break-after: avoid; }
+  h2 .no { color: var(--saffron); margin-right: 6pt; }
+  h3 { font-size: 11.2pt; margin: 12pt 0 5pt; break-after: avoid; }
+  section.chap { break-before: page; }
+  ul { margin: 0 0 7pt; padding-left: 15pt; } li { margin-bottom: 2.5pt; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.6pt; background: var(--paper);
+         padding: 0 2px; border-radius: 2px; }
+  b { font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 9pt; font-size: 8.7pt; line-height: 1.35;
+          break-inside: auto; }
+  th { background: var(--green); color: #fff; text-align: left; font-weight: 600; padding: 4pt 6pt; vertical-align: bottom; }
+  td { padding: 3.5pt 6pt; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr { break-inside: avoid; }
+  tbody tr:nth-child(even) td { background: var(--paper); }
+  td.c, th.c { text-align: center; }
+  .tcap { font-size: 8.6pt; color: var(--muted); margin: 2pt 0 2pt; font-weight: 600; }
+  figure { margin: 6pt 0 12pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--rule); border-radius: 6px; padding: 6pt; background: #fff; }
+  figcaption { font-size: 8.6pt; color: var(--muted); margin-top: 4pt; text-align: center; }
+  figcaption b { color: var(--ink); }
+  .notation { display: inline-block; font-size: 7.8pt; font-weight: 600; color: var(--green-dark);
+              background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 99px;
+              padding: 0 7px; margin-left: 4px; }
+  .box { border: 1px solid var(--rule); border-left: 4px solid var(--green); background: var(--paper);
+         border-radius: 0 6px 6px 0; padding: 7pt 10pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  .box.warn { border-left-color: var(--saffron); background: #fffaf2; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .k { font-size: 8pt; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); }
+  .y { color: var(--green-dark); font-weight: 700; }
+  .p { color: #9a5a00; font-weight: 700; }
+  .n { color: #a33; font-weight: 700; }
+  .chosen td { background: var(--green-soft) !important; }
+  .chosen td:first-child { font-weight: 700; }
+  /* cover */
+  .cover { width: 210mm; height: 296mm; position: relative; break-after: page; overflow: hidden; }
+  .cover .band { position: absolute; right: 0; top: 0; width: 68mm; height: 100%; background: var(--green); }
+  .cover .logo { position: absolute; right: 13mm; top: 58mm; }
+  .cover .meta { position: absolute; left: 22mm; bottom: 24mm; width: 112mm; font-size: 9.2pt; }
+  .cover .meta td { border: 0; padding: 2pt 0; background: none !important; }
+  .cover .meta td:first-child { color: var(--muted); width: 34mm; }
+  .toc { columns: 1; font-size: 10pt; }
+  .toc div { display: flex; border-bottom: 1px dotted var(--rule); padding: 3pt 0; }
+  .toc div span:first-child { width: 10mm; color: var(--saffron); font-weight: 700; }
+
+  .pill { display: inline-block; font-size: 7.6pt; font-weight: 600; border-radius: 99px; padding: 0 6px;
+          white-space: nowrap; border: 1px solid; }
+  .pill.ok { color: var(--green-dark); background: var(--green-soft); border-color: var(--green-line); }
+  .pill.part { color: #8a5200; background: var(--saffron-soft); border-color: #efc98f; }
+  .pill.no { color: #8f2c2c; background: #fbeaea; border-color: #e7b9b9; }
+  .pill.out { color: var(--muted); background: #f0f1ef; border-color: var(--rule); }
+  table.gloss { font-size: 8.5pt; }
+  section.chap table { table-layout: fixed; }
+  section.chap td:first-child { white-space: nowrap; }
+  th code { background: transparent; color: #fff; }
+  td code { overflow-wrap: break-word; }
+  .refs li { font-size: 9pt; margin-bottom: 3pt; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="band"></div>
+  <svg class="logo" width="150" height="150" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="17" fill="#fff"/>
+    <text x="32" y="27.5" text-anchor="middle" dominant-baseline="central" font-family="'Devanagari Sangam MN','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif" font-size="44" font-weight="700" fill="#418d59">तु</text>
+  </svg>
+  <div style="position:absolute;left:22mm;top:48mm;width:112mm">
+    <div class="k">IU · Project: Software Engineering (CSEMCSPSE01) · Portfolio Part 3</div>
+    <div style="font-size:30pt;font-weight:600;line-height:1.1;margin-top:14mm;letter-spacing:-0.6px">Tulsi Tiffins POS</div>
+    <div style="font-size:15pt;color:var(--muted);margin-top:4mm;line-height:1.3">Requirements Specification and Traceability Report</div>
+    <div style="width:22mm;height:3px;background:var(--saffron);margin:10mm 0 8mm"></div>
+    <div style="font-size:11pt;line-height:1.55">The Phase 1 requirements baseline, with the implementation status of every requirement in release v1.0.0 and the code and tests that prove it.</div>
+  </div>
+  <table class="meta">
+    <tr><td>Author</td><td><b>Praveen Mysore Jagannath</b> · 10251728</td></tr>
+    <tr><td>Tutor</td><td>Niknejad, Naghmeh</td></tr>
+    <tr><td>Document version</td><td><b>1.0.0</b> (matches software release v1.0.0)</td></tr>
+    <tr><td>Date</td><td>28 October 2026</td></tr>
+    <tr><td>Baseline</td><td>Phase 1 report v0.1.0, 3 August 2026, Tables 5, 6, 9, 10 and 11</td></tr>
+    <tr><td>Source code</td><td>github.com/mjpraveen04/tulsi-pos</td></tr>
+    <tr><td>Live application</td><td>https://tulsi-web.onrender.com</td></tr>
+  </table>
+</div>
+
+<!-- ============ TOC ============ -->
+<h1>Contents</h1>
+<div class="toc" style="margin:8pt 0 16pt">
+  <div><span>1</span>Purpose, baseline and how to read this report</div>
+  <div><span>2</span>Actors and use cases</div>
+  <div><span>3</span>Functional requirements – status and traceability</div>
+  <div><span>4</span>Non-functional requirements – status and evidence</div>
+  <div><span>5</span>Acceptance test cases TC-01 – TC-08</div>
+  <div><span>6</span>Risks from Phase 1 and how they were verified</div>
+  <div><span>7</span>Changes to the requirements since Phase 1</div>
+  <div><span>8</span>Coverage summary and open items</div>
+  <div><span>9</span>Glossary</div>
+  <div><span>10</span>References</div>
+</div>
+
+<h3>Version history</h3>
+<table>
+  <thead><tr><th style="width:15%">Version</th><th style="width:17%">Date</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr><td>0.1.0</td><td>3 Aug 2026</td><td>Phase 1 conception report: FR-01…30, FR-F1…F4, NFR-01…18, risks TR/BR-01…, test cases TC-01…08, glossary.</td></tr>
+    <tr><td><b>1.0.0</b></td><td>28 Oct 2026</td><td>Status of every requirement after implementation; traceability to code and automated tests; changes since Phase 1; extended glossary.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 1 ============ -->
+<section class="chap">
+<h2><span class="no">1</span>Purpose, baseline and how to read this report</h2>
+<p>This report closes the requirements loop of the project. Phase 1 fixed the requirements before any code was written, as the Waterfall model requires, and prioritised them with MoSCoW. This report takes that baseline unchanged – the identifiers and wording are those of the Phase 1 report – and states for each requirement whether release v1.0.0 meets it, where it is implemented and which test proves it.</p>
+
+<h3>1.1 The baseline in numbers</h3>
+<table>
+  <thead><tr><th>Group</th><th class="c">Must</th><th class="c">Should</th><th class="c">Could</th><th class="c">Won’t (this time)</th><th class="c">Total</th></tr></thead>
+  <tbody>
+    <tr><td>Functional requirements FR-01…30</td><td class="c">24</td><td class="c">4</td><td class="c">2</td><td class="c">–</td><td class="c">30</td></tr>
+    <tr><td>Future phases FR-F1…F4</td><td class="c">–</td><td class="c">–</td><td class="c">–</td><td class="c">4</td><td class="c">4</td></tr>
+    <tr><td>Non-functional requirements NFR-01…18</td><td class="c" colspan="4">not prioritised; each has a measurement method</td><td class="c">18</td></tr>
+    <tr><td>Acceptance test cases TC-01…08</td><td class="c" colspan="4">cover the Must-have requirements (Phase 1 Table 10)</td><td class="c">8</td></tr>
+  </tbody>
+</table>
+
+<h3>1.2 Status values</h3>
+<table>
+  <thead><tr><th style="width:22%">Status</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pill ok">Met</span></td><td>Implemented and verified by at least one automated test that passes on release v1.0.0, or by the named review.</td></tr>
+    <tr><td><span class="pill part">Partly met</span></td><td>Implemented, but part of the acceptance criterion is not met or not measured. The gap is listed as technical debt (TD-xx).</td></tr>
+    <tr><td><span class="pill no">Not measured</span></td><td>The design supports the requirement, but the planned measurement has not been carried out.</td></tr>
+    <tr><td><span class="pill out">Deferred</span></td><td>Won’t-have in Phase 1; intentionally not built.</td></tr>
+  </tbody>
+</table>
+
+<h3>1.3 Where the evidence comes from</h3>
+<ul>
+  <li><b>Automated tests:</b> 120 pytest tests in <code>backend/tests/</code>, run against a real PostgreSQL database (16 locally, 18 in a second run matching the cloud database). They are cited as <code>module::<wbr>test name</code>, for example <code>billing::<wbr>tc03</code> for <code>test_<wbr>billing.py::<wbr>test_<wbr>tc03_<wbr>insufficient_<wbr>stock_<wbr>is_<wbr>rejected_<wbr>and_<wbr>nothing_<wbr>is_<wbr>written</code>. All 120 pass; the full suite takes about 112 s.</li>
+  <li><b>Code:</b> backend services in <code>backend/app/services/</code> (the only layer with business rules), front-end screens in <code>frontend/src/screens/</code>.</li>
+  <li><b>Live smoke test</b> on 28 Oct 2026 against https://tulsi-web.onrender.com: 401 without a token, 401 for a wrong PIN, 403 for a cashier on a manager route, a cash sale (bill 1042, ₹84.00, change ₹416.00), a UPI sale (bill 1043, ₹42.00), an oversell rejected with 409 “only 57 left”, photo upload and delete, and the daily total (₹126.00).</li>
+  <li><b>Reviews:</b> code-structure and schema inspection, where Phase 1 names a review as the measurement method.</li>
+</ul>
+<p>The architecture behind these requirements – components, data model, the atomic sale and the deployment – is described in the separate <i>Architecture Documentation v1.0.0</i>. Technical-debt identifiers (TD-01…10) are the same in both documents.</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="chap">
+<h2><span class="no">2</span>Actors and use cases</h2>
+<p>Two human actors use the system. The <b>Cashier</b> rings up sales and takes payment; the <b>Manager</b> can do everything a cashier can and also maintains products, stock and staff and sees the daily total. Both sign in with a four-digit PIN. The <b>Customer</b> is a secondary actor: they pay, and for UPI scan the café’s QR code with their own phone, outside the system.</p>
+<figure>
+  <img src="../architecture/diagrams/png/01-use-cases.png" style="max-height:150mm">
+  <figcaption><b>Figure 1:</b> Use cases of release v1.0.0 with the requirements each one realises <span class="notation">UML 2.5 use case diagram · legend in figure</span></figcaption>
+</figure>
+<p>Role enforcement is a server-side rule (NFR-11): a hidden tab in the user interface is only a convenience. Every manager-only use case returns HTTP 403 for a cashier token, which is tested for every manager endpoint (Section 3, FR-04).</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="chap">
+<h2><span class="no">3</span>Functional requirements – status and traceability</h2>
+<p>Every row gives the Phase 1 requirement (shortened), its MoSCoW priority, where it is implemented and which tests verify it. Tests are cited by module and a short form of the test name; all of them pass.</p>
+
+<h3>3.1 Authentication and access (FR-01 – FR-08)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:22%">Requirement</th><th style="width:6%">Prio</th><th style="width:22%">Implemented in</th><th>Verified by</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>FR-01</td><td>Log in with a staff PIN</td><td>M</td><td><code>services/auth.authenticate</code>; <code>screens/Login</code></td><td>auth::<wbr>login_<wbr>with_<wbr>correct_<wbr>pin, ::<wbr>wrong_<wbr>pin_<wbr>is_<wbr>rejected, ::<wbr>unknown_<wbr>user, ::<wbr>rejects_<wbr>non_<wbr>four_<wbr>digit_<wbr>pin</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-02</td><td>Signed JWT issued on login</td><td>M</td><td><code>security.create_<wbr>access_<wbr>token</code></td><td>auth::<wbr>login_<wbr>…_<wbr>returns_<wbr>token, ::<wbr>me_<wbr>returns_<wbr>the_<wbr>signed_<wbr>in_<wbr>user, ::<wbr>token_<wbr>signed_<wbr>with_<wbr>another_<wbr>secret_<wbr>is_<wbr>401</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-03</td><td>Two roles, Manager and Cashier</td><td>M</td><td><code>models.User.role</code> (enum); role guards in <code>security</code></td><td>rbac::<wbr>role_<wbr>is_<wbr>read_<wbr>from_<wbr>the_<wbr>database_<wbr>not_<wbr>the_<wbr>token, ::<wbr>cashier_<wbr>token_<wbr>cannot_<wbr>be_<wbr>upgraded</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-04</td><td>Products, inventory and staff are manager-only</td><td>M</td><td><code>require_<wbr>manager</code> on every manager route</td><td>rbac::<wbr>role_<wbr>is_<wbr>enforced_<wbr>server_<wbr>side (parametrised over every manager endpoint), ::<wbr>tc01; inventory::<wbr>writes_<wbr>are_<wbr>manager_<wbr>only; staff::<wbr>reject_<wbr>a_<wbr>cashier; photos::<wbr>manager_<wbr>only; orders::<wbr>daily_<wbr>total_<wbr>is_<wbr>manager_<wbr>only</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-05</td><td>Both roles use the Register and take payment</td><td>M</td><td><code>routers/register</code>, <code>routers/bills</code> with <code>get_<wbr>current_<wbr>user</code></td><td>billing::<wbr>cashiers_<wbr>and_<wbr>managers_<wbr>can_<wbr>both_<wbr>ring_<wbr>up_<wbr>sales; payments::<wbr>tc04, ::<wbr>tc07</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-06</td><td>Missing, invalid or expired tokens rejected</td><td>M</td><td><code>security.get_<wbr>current_<wbr>user</code></td><td>rbac::<wbr>no_<wbr>token_<wbr>is_<wbr>401 (every route), ::<wbr>malformed_<wbr>authorization_<wbr>headers; auth::<wbr>expired_<wbr>token_<wbr>is_<wbr>401</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-07</td><td>PINs stored only as salted hashes</td><td>M</td><td>bcrypt via passlib in <code>security</code></td><td>auth::<wbr>pins_<wbr>are_<wbr>stored_<wbr>as_<wbr>salted_<wbr>bcrypt_<wbr>hashes; auth::<wbr>pin_<wbr>targets_<wbr>never_<wbr>leak_<wbr>hashes</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-08</td><td>Session ends after one shift; log-out</td><td>S</td><td><code>JWT_<wbr>EXPIRE_<wbr>HOURS=8</code>; <code>/api/auth/logout</code>; client clears token</td><td>auth::<wbr>token_<wbr>lifetime_<wbr>is_<wbr>one_<wbr>shift, ::<wbr>logout_<wbr>endpoint_<wbr>exists, ::<wbr>expired_<wbr>token_<wbr>is_<wbr>401. Server-side revocation: see TD-06</td><td><span class="pill ok">Met</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Staff management (FR-09 – FR-11)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:22%">Requirement</th><th style="width:6%">Prio</th><th style="width:22%">Implemented in</th><th>Verified by</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>FR-09</td><td>Manager adds staff with name, role and PIN</td><td>M</td><td><code>services/users.create_<wbr>user</code>; <code>screens/Staff</code></td><td>staff::<wbr>new_<wbr>staff_<wbr>member_<wbr>can_<wbr>sign_<wbr>in_<wbr>immediately, ::<wbr>duplicate_<wbr>names_<wbr>are_<wbr>rejected, ::<wbr>manager_<wbr>can_<wbr>list_<wbr>staff</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-10</td><td>Manager resets a PIN</td><td>S</td><td><code>services/users.update_<wbr>user</code></td><td>staff::<wbr>pin_<wbr>reset_<wbr>invalidates_<wbr>the_<wbr>old_<wbr>pin</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-11</td><td>Manager deactivates an account; history kept</td><td>C</td><td><code>services/users.deactivate_<wbr>user</code> (soft delete)</td><td>staff::<wbr>deactivate_<wbr>keeps_<wbr>the_<wbr>record_<wbr>but_<wbr>blocks_<wbr>login, ::<wbr>cannot_<wbr>deactivate_<wbr>yourself, ::<wbr>cannot_<wbr>deactivate_<wbr>the_<wbr>last_<wbr>active_<wbr>manager, ::<wbr>cannot_<wbr>demote_<wbr>the_<wbr>last_<wbr>active_<wbr>manager; auth::<wbr>deactivated_<wbr>user_<wbr>cannot_<wbr>log_<wbr>in; rbac::<wbr>token_<wbr>for_<wbr>a_<wbr>deactivated_<wbr>user_<wbr>stops_<wbr>working</td><td><span class="pill ok">Met</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.3 Product and inventory (FR-12 – FR-18)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:22%">Requirement</th><th style="width:6%">Prio</th><th style="width:22%">Implemented in</th><th>Verified by</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>FR-12</td><td>Create product with name, category, price, opening stock, reorder level</td><td>M</td><td><code>services/inventory.create_<wbr>product</code>; <code>screens/Inventory</code></td><td>inventory::<wbr>creating_<wbr>a_<wbr>product_<wbr>writes_<wbr>an_<wbr>opening_<wbr>ledger_<wbr>move, ::<wbr>no_<wbr>opening_<wbr>stock_<wbr>has_<wbr>no_<wbr>move</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-13</td><td>Edit product; old bills keep the old price</td><td>M</td><td><code>services/inventory.update_<wbr>product</code></td><td>inventory::<wbr>price_<wbr>edit_<wbr>does_<wbr>not_<wbr>touch_<wbr>stock; orders::<wbr>tc08_<wbr>old_<wbr>receipt_<wbr>keeps_<wbr>the_<wbr>price_<wbr>at_<wbr>sale</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-14</td><td>Archive product: hidden from Register, kept in history</td><td>M</td><td><code>services/inventory.set_<wbr>archived</code></td><td>inventory::<wbr>archived_<wbr>products_<wbr>disappear_<wbr>from_<wbr>the_<wbr>register_<wbr>but_<wbr>stay_<wbr>retrievable; billing::<wbr>archived_<wbr>item_<wbr>cannot_<wbr>be_<wbr>billed; orders::<wbr>archived_<wbr>product_<wbr>still_<wbr>appears_<wbr>on_<wbr>its_<wbr>old_<wbr>receipt</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-15</td><td>One-tap receive / remove stock, written to the ledger</td><td>M</td><td><code>services/inventory.adjust_<wbr>stock</code></td><td>inventory::<wbr>receive_<wbr>and_<wbr>remove_<wbr>write_<wbr>moves_<wbr>and_<wbr>update_<wbr>cached_<wbr>stock, ::<wbr>removing_<wbr>more_<wbr>than_<wbr>available_<wbr>is_<wbr>rejected, ::<wbr>adjustments_<wbr>must_<wbr>be_<wbr>receive_<wbr>or_<wbr>remove; billing::<wbr>tc05</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-16</td><td>Search and filter products by name and category (within 2 s)</td><td>S</td><td><code>services/inventory.list_<wbr>products</code>; category chips on the Register</td><td>inventory::<wbr>search_<wbr>and_<wbr>category_<wbr>filter. The 2 s target with 1,000 products is not measured (TD-01)</td><td><span class="pill part">Partly met</span></td></tr>
+    <tr><td>FR-17</td><td>Low-stock badge at or below reorder level</td><td>S</td><td><code>is_<wbr>low_<wbr>stock</code> / <code>is_<wbr>sold_<wbr>out</code> in the menu; badge in <code>screens/Register</code></td><td>inventory::<wbr>menu_<wbr>flags_<wbr>low_<wbr>stock_<wbr>and_<wbr>sold_<wbr>out</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-18</td><td>Prevent selling more than the available stock</td><td>M</td><td>Stepper disabled at stock in <code>screens/Register</code>; enforced by <code>services/billing.create_<wbr>bill</code> under row lock and <code>CHECK (stock &gt;= 0)</code></td><td>billing::<wbr>tc03, ::<wbr>repeated_<wbr>lines_<wbr>…_<wbr>merged_<wbr>before_<wbr>the_<wbr>stock_<wbr>check, ::<wbr>sold_<wbr>out_<wbr>item_<wbr>cannot_<wbr>be_<wbr>billed, ::<wbr>selling_<wbr>the_<wbr>exact_<wbr>remaining_<wbr>stock_<wbr>is_<wbr>allowed; gates::<wbr>two_<wbr>simultaneous_<wbr>bills, ::<wbr>ten_<wbr>concurrent_<wbr>bills; inventory::<wbr>database_<wbr>check_<wbr>constraint_<wbr>blocks_<wbr>negative_<wbr>stock; live smoke 409</td><td><span class="pill ok">Met</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.4 Register and billing (FR-19 – FR-25)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:22%">Requirement</th><th style="width:6%">Prio</th><th style="width:22%">Implemented in</th><th>Verified by</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>FR-19</td><td>Active products as category-filterable cards</td><td>M</td><td><code>routers/register</code> <code>GET /api/register/menu</code>; photo cards in <code>screens/Register</code></td><td>inventory::<wbr>menu_<wbr>groups_<wbr>by_<wbr>category, ::<wbr>menu_<wbr>flags_<wbr>low_<wbr>stock_<wbr>and_<wbr>sold_<wbr>out; photos::<wbr>uploaded_<wbr>photo_<wbr>appears_<wbr>on_<wbr>the_<wbr>register_<wbr>menu</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-20</td><td>Cart: add items, change quantity, remove lines</td><td>M</td><td>Basket state in <code>screens/Register</code> (client side; nothing is stored until payment)</td><td>Manual: TC-02 walkthrough on the live app. No front-end unit test (TD-02)</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-21</td><td>Subtotal, 5 % GST and total live, in ₹</td><td>M</td><td><code>services/money</code> (Decimal, half-up) for the stored bill; live preview in <code>screens/Register</code></td><td>billing::<wbr>money_<wbr>maths_<wbr>rounds_<wbr>half_<wbr>up, ::<wbr>tc02_<wbr>gst_<wbr>and_<wbr>totals. The browser preview uses JavaScript numbers (TD-09)</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-22</td><td>Bill, lines, stock moves and decrement in one transaction</td><td>M</td><td><code>services/billing.create_<wbr>bill</code> – the only writer of bills</td><td>gates::<wbr>failure_<wbr>midway_<wbr>through_<wbr>the_<wbr>sale_<wbr>writes_<wbr>nothing, ::<wbr>insufficient_<wbr>stock_<wbr>rolls_<wbr>back_<wbr>the_<wbr>whole_<wbr>basket; billing::<wbr>tc05</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-23</td><td>Reject a bill exceeding stock, full rollback, clear message</td><td>M</td><td><code>InsufficientStockError</code> → HTTP 409 “Insufficient stock: only N left”</td><td>billing::<wbr>tc03 (asserts the exact message and that nothing is written); gates::<wbr>insufficient_<wbr>stock_<wbr>rolls_<wbr>back_<wbr>the_<wbr>whole_<wbr>basket</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-24</td><td>Unique, sequential bill number</td><td>M</td><td>PostgreSQL sequence <code>bill_<wbr>no_<wbr>seq</code>, taken only after every check; <code>UNIQUE</code> on <code>bill_<wbr>no</code></td><td>billing::<wbr>tc06; gates::<wbr>rejected_<wbr>sale_<wbr>does_<wbr>not_<wbr>consume_<wbr>a_<wbr>bill_<wbr>number; payments::<wbr>short_<wbr>cash_<wbr>does_<wbr>not_<wbr>burn_<wbr>a_<wbr>bill_<wbr>number</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-25</td><td>Price at time of sale recorded on each line</td><td>M</td><td><code>BillLine.unit_<wbr>price</code> copied in <code>create_<wbr>bill</code></td><td>billing::<wbr>receipt_<wbr>carries_<wbr>price_<wbr>at_<wbr>sale; orders::<wbr>tc08</td><td><span class="pill ok">Met</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.5 Payments and order history (FR-26 – FR-30)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:22%">Requirement</th><th style="width:6%">Prio</th><th style="width:22%">Implemented in</th><th>Verified by</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>FR-26</td><td>Choose Cash or UPI before confirming</td><td>M</td><td><code>components/PaymentModal</code>; <code>Payment.method</code></td><td>payments::<wbr>tc04, ::<wbr>tc07, ::<wbr>cash_<wbr>without_<wbr>a_<wbr>tendered_<wbr>amount_<wbr>is_<wbr>rejected, ::<wbr>upi_<wbr>must_<wbr>not_<wbr>carry_<wbr>a_<wbr>tendered_<wbr>amount</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-27</td><td>Cash: amount tendered and change due</td><td>M</td><td><code>services/billing</code> (change = tendered − total, rejected if short)</td><td>payments::<wbr>tc04_<wbr>cash_<wbr>change, ::<wbr>exact_<wbr>cash_<wbr>gives_<wbr>no_<wbr>change, ::<wbr>short_<wbr>cash_<wbr>is_<wbr>rejected_<wbr>and_<wbr>nothing_<wbr>is_<wbr>written</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-28</td><td>UPI: static QR, manual confirmation</td><td>M</td><td><code>services/payments</code> (qrcode); “Mark paid” in <code>PaymentModal</code></td><td>payments::<wbr>upi_<wbr>qr_<wbr>endpoint_<wbr>returns_<wbr>a_<wbr>scannable_<wbr>png, ::<wbr>tc07, ::<wbr>upi_<wbr>qr_<wbr>requires_<wbr>authentication. Manual confirmation by design (TD-04)</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-29</td><td>Order history searchable by date and bill number, receipt view</td><td>M</td><td><code>services/orders</code>; <code>screens/Orders</code></td><td>orders::<wbr>history_<wbr>lists_<wbr>bills_<wbr>newest_<wbr>first, ::<wbr>searched_<wbr>by_<wbr>bill_<wbr>number, ::<wbr>filtered_<wbr>by_<wbr>date, ::<wbr>unknown_<wbr>bill_<wbr>number_<wbr>is_<wbr>404, ::<wbr>multi_<wbr>line_<wbr>receipt_<wbr>summary, ::<wbr>tc08</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>FR-30</td><td>Daily sales total for managers</td><td>C</td><td><code>services/orders.daily_<wbr>total</code></td><td>orders::<wbr>daily_<wbr>total_<wbr>sums_<wbr>todays_<wbr>bills, ::<wbr>zero_<wbr>on_<wbr>a_<wbr>quiet_<wbr>day, ::<wbr>manager_<wbr>only; live smoke ₹126.00</td><td><span class="pill ok">Met</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.6 Future phases (FR-F1 – FR-F4)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th>Requirement</th><th style="width:44%">Decision</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>FR-F1</td><td>Automated UPI gateway verification</td><td>Not built. Needs a merchant account and a public webhook; replaced by the static QR (FR-28).</td><td><span class="pill out">Deferred</span></td></tr>
+    <tr><td>FR-F2</td><td>Supplier purchase orders and stock-in</td><td>Not built. Stock is received with the one-tap RECEIVE move (FR-15).</td><td><span class="pill out">Deferred</span></td></tr>
+    <tr><td>FR-F3</td><td>Sales and inventory charts</td><td>Not built. Only the daily total (FR-30) exists.</td><td><span class="pill out">Deferred</span></td></tr>
+    <tr><td>FR-F4</td><td>Table and reservation management</td><td>Not built.</td><td><span class="pill out">Deferred</span></td></tr>
+  </tbody>
+</table>
+<div class="box"><p><b>Result:</b> all 24 Must-have and 4 Should-have requirements are implemented, as are both Could-have requirements; 29 are fully met. FR-16 is implemented but its 2-second target is not measured. None of the four Won’t-have items was pulled in, so the MoSCoW freeze held for the whole project.</p></div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="chap">
+<h2><span class="no">4</span>Non-functional requirements – status and evidence</h2>
+<p>The measurement column repeats the method planned in Phase 1. Where it was not carried out, the status says so rather than relying on the design alone.</p>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:21%">Requirement</th><th style="width:16%">Planned measurement</th><th>Evidence in v1.0.0</th><th style="width:13%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>NFR-01</td><td>Register and search within 2 s for 1,000 products</td><td>Load test with a seeded catalogue</td><td>Indexed queries; menu is one query. Load test not run (TD-01).</td><td><span class="pill no">Not measured</span></td></tr>
+    <tr><td>NFR-02</td><td>Bill confirmation within 1 s</td><td>API response time</td><td>One short transaction per sale. Not measured; on the free host the first request after 15 idle minutes takes 30–60 s (TD-01, TD-05).</td><td><span class="pill no">Not measured</span></td></tr>
+    <tr><td>NFR-03</td><td>10 concurrent Register users</td><td>Locust load test</td><td>Correctness under 10 parallel sales is proven (gates::<wbr>ten_<wbr>concurrent_<wbr>bills); throughput not measured (TD-01).</td><td><span class="pill no">Not measured</span></td></tr>
+    <tr><td>NFR-04</td><td>Stock never negative, even concurrently</td><td>Simultaneous-bill test</td><td>Release gates gates::<wbr>two_<wbr>simultaneous_<wbr>bills_<wbr>for_<wbr>the_<wbr>last_<wbr>unit_<wbr>leave_<wbr>exactly_<wbr>one_<wbr>winner and ::<wbr>ten_<wbr>concurrent_<wbr>bills_<wbr>never_<wbr>oversell; <code>SELECT … FOR UPDATE</code> in ascending id order; <code>CHECK (stock &gt;= 0)</code> tested by inventory::<wbr>database_<wbr>check_<wbr>constraint_<wbr>blocks_<wbr>negative_<wbr>stock.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-05</td><td>All multi-step writes are ACID</td><td>Fault injection</td><td>Release gate gates::<wbr>failure_<wbr>midway_<wbr>through_<wbr>the_<wbr>sale_<wbr>writes_<wbr>nothing injects an error after the stock decrement; nothing is written. Also ::<wbr>insufficient_<wbr>stock_<wbr>rolls_<wbr>back_<wbr>the_<wbr>whole_<wbr>basket.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-06</td><td>Append-only ledger reconciles with stock</td><td>Reconciliation query</td><td>inventory::<wbr>ledger_<wbr>sum_<wbr>always_<wbr>equals_<wbr>cached_<wbr>stock; the code has no UPDATE or DELETE on <code>stock_<wbr>moves</code>.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-07</td><td>Every endpoint except login needs a JWT</td><td>401 without a token</td><td>rbac::<wbr>no_<wbr>token_<wbr>is_<wbr>401 runs against every protected route. Three more routes are public on purpose: the staff name list for the login picker, the health check and product photos (Section 7).</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-08</td><td>Tokens expire after about 8 h</td><td>Token-lifetime test</td><td>auth::<wbr>token_<wbr>lifetime_<wbr>is_<wbr>one_<wbr>shift, ::<wbr>expired_<wbr>token_<wbr>is_<wbr>401. No server-side revocation apart from deactivation (TD-06).</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-09</td><td>PINs hashed with a per-user salt</td><td>Review and DB inspection</td><td>auth::<wbr>pins_<wbr>are_<wbr>stored_<wbr>as_<wbr>salted_<wbr>bcrypt_<wbr>hashes (two equal PINs give different hashes). No lock-out after wrong PINs (TD-03).</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-10</td><td>All input validated server-side</td><td>Negative-input tests</td><td>Pydantic models on every route: auth::<wbr>rejects_<wbr>non_<wbr>four_<wbr>digit_<wbr>pin; billing::<wbr>empty_<wbr>and_<wbr>malformed_<wbr>baskets_<wbr>are_<wbr>rejected; payments::<wbr>upi_<wbr>must_<wbr>not_<wbr>carry_<wbr>a_<wbr>tendered_<wbr>amount; photos::<wbr>script_<wbr>renamed_<wbr>as_<wbr>png, ::<wbr>svg_<wbr>is_<wbr>rejected, ::<wbr>oversized_<wbr>images (uploads are decoded and re-encoded).</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-11</td><td>Roles enforced server-side on every endpoint</td><td>Cashier token → 403</td><td>rbac::<wbr>role_<wbr>is_<wbr>enforced_<wbr>server_<wbr>side for every manager route; role read from the database on each request (rbac::<wbr>role_<wbr>is_<wbr>read_<wbr>from_<wbr>the_<wbr>database_<wbr>not_<wbr>the_<wbr>token); live smoke 403.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-12</td><td>Tablet use, large targets, ≤ 4 taps per bill</td><td>Walkthrough, tap count</td><td>Touch layout with photo cards. A one-item UPI sale takes 4 taps (item, Charge, UPI, Mark paid); a cash sale also needs the amount typed (TD-10). The walkthrough was done by the developer, not by café staff.</td><td><span class="pill part">Partly met</span></td></tr>
+    <tr><td>NFR-13</td><td>Clear, human-readable errors</td><td>Review of error paths</td><td>Domain errors mapped centrally in <code>app.main</code>; tests assert exact messages, e.g. “Insufficient stock: only 3 left” (billing::<wbr>tc03) and “less than the total” (payments::<wbr>short_<wbr>cash_<wbr>…).</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-14</td><td>One Docker Compose command deploys everything</td><td>Clean-machine test</td><td><code>docker compose up --build</code> runs migrations, seed and app. The same Dockerfile was built from scratch by Render. Local PostgreSQL 16 vs cloud 18: TD-08.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-15</td><td>Front end and back end deploy separately, REST only</td><td>Architecture review</td><td>Two services in <code>render.yaml</code> (static site and Docker API) and two containers locally; the SPA calls only <code>/api</code> and <code>/media</code>.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-16</td><td>Routing, service and data-access layers</td><td>Code-structure review</td><td>No router imports <code>app.models</code> or runs a query; all rules in <code>app/services/</code> (checked by search over <code>app/routers/</code>).</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-17</td><td>Schema via versioned migrations</td><td>Migration history</td><td>Alembic revisions 0001 (initial schema) and 0002 (product photos); <code>alembic upgrade head</code> on start; the app never creates tables itself.</td><td><span class="pill ok">Met</span></td></tr>
+    <tr><td>NFR-18</td><td>Each bill and stock move records user and time</td><td>Schema inspection</td><td><code>bills.cashier_<wbr>id</code>, <code>stock_<wbr>moves.user_<wbr>id</code>, <code>created_<wbr>at</code> on both; inventory::<wbr>stock_<wbr>move_<wbr>feed_<wbr>records_<wbr>actor_<wbr>and_<wbr>time.</td><td><span class="pill ok">Met</span></td></tr>
+  </tbody>
+</table>
+<div class="box warn"><p><b>Result:</b> 14 of 18 non-functional requirements are met and verified. NFR-12 is partly met. The three performance requirements NFR-01…03 are designed for but were not measured: the planned load test was cut when the schedule slipped. The correctness of concurrent sales, the more important half of NFR-03, is covered by the release gates.</p></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="chap">
+<h2><span class="no">5</span>Acceptance test cases TC-01 – TC-08</h2>
+<p>Phase 1 specified eight manual test cases. Each one is now also an automated test with the same data and expected result, so it runs on every change and not only once before the demo. The table shows the Phase 1 expectation, the automated test and the result on release v1.0.0.</p>
+<table>
+  <thead><tr><th style="width:8%">TC</th><th style="width:12%">Req.</th><th style="width:33%">Expected result (Phase 1)</th><th style="width:28%">Automated test</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>TC-01</td><td>FR-04, NFR-11</td><td>Cashier lands on the Register; Products page and endpoint blocked with 403.</td><td>rbac::<wbr>tc01_<wbr>cashier_<wbr>sees_<wbr>the_<wbr>register_<wbr>but_<wbr>not_<wbr>inventory</td><td><span class="pill ok">Pass</span> · live 403</td></tr>
+    <tr><td>TC-02</td><td>FR-21</td><td>2× Dosa ₹90, 1× Coffee ₹40, 3× Chai ₹25 → subtotal ₹295.00, GST ₹14.75, total ₹309.75.</td><td>billing::<wbr>tc02_<wbr>gst_<wbr>and_<wbr>totals</td><td><span class="pill ok">Pass</span></td></tr>
+    <tr><td>TC-03</td><td>FR-22, FR-23</td><td>Item with 3 in stock, order 5: “Insufficient stock: only 3 left”; stock still 3; no bill or ledger rows.</td><td>billing::<wbr>tc03_<wbr>insufficient_<wbr>stock_<wbr>is_<wbr>rejected_<wbr>and_<wbr>nothing_<wbr>is_<wbr>written</td><td><span class="pill ok">Pass</span> · live 409</td></tr>
+    <tr><td>TC-04</td><td>FR-27</td><td>Total ₹309.75, tendered ₹500 → change ₹190.25; bill saved as Cash.</td><td>payments::<wbr>tc04_<wbr>cash_<wbr>change</td><td><span class="pill ok">Pass</span> · live cash sale</td></tr>
+    <tr><td>TC-05</td><td>FR-15, FR-22</td><td>Dosa 24, sell 2 → 22, with a −2 SALE move referencing the bill.</td><td>billing::<wbr>tc05_<wbr>stock_<wbr>deduction_<wbr>and_<wbr>ledger_<wbr>move</td><td><span class="pill ok">Pass</span></td></tr>
+    <tr><td>TC-06</td><td>FR-24</td><td>Second bill number = first + 1; no duplicates.</td><td>billing::<wbr>tc06_<wbr>bill_<wbr>numbers_<wbr>are_<wbr>sequential_<wbr>and_<wbr>unique</td><td><span class="pill ok">Pass</span> · live 1042 → 1043</td></tr>
+    <tr><td>TC-07</td><td>FR-26, FR-28</td><td>UPI: QR shown, “Mark paid” saves the bill as UPI and deducts stock.</td><td>payments::<wbr>tc07_<wbr>upi_<wbr>payment_<wbr>marks_<wbr>paid_<wbr>and_<wbr>deducts_<wbr>stock</td><td><span class="pill ok">Pass</span> · live UPI sale</td></tr>
+    <tr><td>TC-08</td><td>FR-29, FR-25</td><td>Old receipt found by bill number shows the price at sale after a later price change.</td><td>orders::<wbr>tc08_<wbr>old_<wbr>receipt_<wbr>keeps_<wbr>the_<wbr>price_<wbr>at_<wbr>sale</td><td><span class="pill ok">Pass</span></td></tr>
+  </tbody>
+</table>
+
+<h3>5.1 Test suite by module</h3>
+<table>
+  <thead><tr><th>Module (<code>backend/tests/</code>)</th><th class="c">Tests</th><th>Main requirements</th></tr></thead>
+  <tbody>
+    <tr><td>test_<wbr>auth.py</td><td class="c">13</td><td>FR-01, 02, 06–08, 11; NFR-07–10</td></tr>
+    <tr><td>test_rbac.py (parametrised over every route)</td><td class="c">27</td><td>FR-03, 04, 06, 11; NFR-07, 11</td></tr>
+    <tr><td>test_<wbr>staff.py</td><td class="c">11</td><td>FR-04, 09–11</td></tr>
+    <tr><td>test_<wbr>inventory.py</td><td class="c">14</td><td>FR-04, 12–19; NFR-04, 06, 18</td></tr>
+    <tr><td>test_<wbr>billing.py</td><td class="c">13</td><td>FR-05, 14, 18, 19, 21–25; NFR-10, 13</td></tr>
+    <tr><td>test_<wbr>billing_<wbr>gates.py – <b>release gates</b></td><td class="c">6</td><td>NFR-04, NFR-05, FR-24, TR-04</td></tr>
+    <tr><td>test_<wbr>payments.py</td><td class="c">9</td><td>FR-24, 26–28</td></tr>
+    <tr><td>test_<wbr>orders.py</td><td class="c">11</td><td>FR-04, 14, 25, 29, 30</td></tr>
+    <tr><td>test_<wbr>photos.py</td><td class="c">16</td><td>FR-04, 19; NFR-07, 10</td></tr>
+    <tr><td><b>Total</b></td><td class="c"><b>120</b></td><td>all pass on PostgreSQL 16 and 18; about 112 s</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="chap">
+<h2><span class="no">6</span>Risks from Phase 1 and how they were verified</h2>
+<p>Phase 1 listed five technical and four project risks, each with a mitigation. The table states whether the mitigation was carried out and what evidence exists.</p>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:28%">Risk (Phase 1)</th><th>Mitigation carried out and evidence</th><th style="width:12%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>TR-01</td><td>Race condition sells the same dish twice</td><td>Row locks + CHECK; concurrency release gates pass.</td><td><span class="pill ok">Closed</span></td></tr>
+    <tr><td>TR-02</td><td>Partial writes from unfamiliar transaction semantics</td><td>One transaction in <code>services/billing</code>; fault-injection gate passes.</td><td><span class="pill ok">Closed</span></td></tr>
+    <tr><td>TR-03</td><td>Prototype does not translate into React</td><td>Prototype used as visual reference only; five screens rebuilt as typed components.</td><td><span class="pill ok">Closed</span></td></tr>
+    <tr><td>TR-04</td><td>₹ / GST rounding errors</td><td>Decimal + NUMERIC; gates::<wbr>money_<wbr>never_<wbr>uses_<wbr>float; billing::<wbr>money_<wbr>maths_<wbr>rounds_<wbr>half_<wbr>up. The browser preview still uses JavaScript numbers (TD-09).</td><td><span class="pill ok">Closed</span></td></tr>
+    <tr><td>TR-05</td><td>Docker behaves differently on another machine</td><td>Same images locally and on Render; suite passes on PostgreSQL 16 and 18. Version gap remains (TD-08).</td><td><span class="pill part">Mitigated</span></td></tr>
+    <tr><td>BR-01</td><td>Scope creep</td><td>MoSCoW freeze held: 0 of 4 Won’t-have items built.</td><td><span class="pill ok">Closed</span></td></tr>
+    <tr><td>BR-02</td><td>Owners distrust a self-hosted till</td><td>Familiar counter flow, cash and UPI from day one. Not validated with a real café owner.</td><td><span class="pill part">Open</span></td></tr>
+    <tr><td>BR-03</td><td>Solo developer’s timeline stalls</td><td><b>Occurred:</b> planned end 25 Sep, actual 28 Oct (+33 days). Must-haves were front-loaded, so only the load test had to be cut.</td><td><span class="pill no">Occurred</span></td></tr>
+    <tr><td>BR-04</td><td>A missed requirement surfaces late</td><td><b>Partly occurred:</b> two gaps were found in the final phase – short cash still used up a bill number (FR-24), and the free cloud host’s disk would have lost photos. Both fixed with a regression test and migration 0002.</td><td><span class="pill ok">Closed</span></td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="chap">
+<h2><span class="no">7</span>Changes to the requirements since Phase 1</h2>
+<p>No requirement was removed or re-prioritised. The changes below refine how a requirement is met; each was made during implementation when a test or the deployment showed that the Phase 1 wording left a gap.</p>
+<table>
+  <thead><tr><th style="width:12%">Affects</th><th style="width:30%">Change</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>FR-24</td><td>The bill number is taken only after every check, including stock and the cash amount.</td><td>PostgreSQL sequences are not rolled back. Taking the number first left gaps for rejected sales; a Phase 3 test showed that short cash still caused one (bill 1044 instead of 1043).</td></tr>
+    <tr><td>FR-27</td><td>A cash payment below the total is rejected with HTTP 400 and nothing is written.</td><td>The Phase 1 criterion described only the change calculation, not the short-payment case.</td></tr>
+    <tr><td>FR-11</td><td>The last active manager cannot be deactivated or demoted, and nobody can deactivate themselves.</td><td>A staff test showed the café could lock every manager out.</td></tr>
+    <tr><td>FR-11, NFR-11</td><td>Role and active flag are re-read from the database on every request, not trusted from the token.</td><td>A deactivated or demoted user must lose access at once, not after 8 hours.</td></tr>
+    <tr><td>FR-12, FR-19</td><td>Managers can upload a product photo; the photo is stored in PostgreSQL (migration 0002), decoded and re-encoded on upload.</td><td>The Register shows photo cards as in the prototype. The free cloud host wipes its disk on restart, so a file volume would lose photos; re-encoding blocks disguised files (NFR-10).</td></tr>
+    <tr><td>FR-29</td><td>Cashiers can also read the bill history (receipt reprint); only the daily total is manager-only.</td><td>Phase 1 already named both actors for FR-29; the manager-only part is FR-30.</td></tr>
+    <tr><td>NFR-07</td><td>Three routes besides login are public: the staff name list for the login picker, <code>/api/health</code> and product photo files.</td><td>The login screen must list names before anyone is signed in; the host’s health check has no token; photos are loaded by <code>&lt;img&gt;</code> tags, which cannot send a token. None of them returns PIN hashes or sales data (auth::<wbr>pin_<wbr>targets_<wbr>never_<wbr>leak_<wbr>hashes). Names on the login screen: TD-07.</td></tr>
+    <tr><td>NFR-14</td><td>Added a cloud deployment (Render + Neon) next to Docker Compose.</td><td>The final submission needs a working link. Same Dockerfiles; configuration only through environment variables.</td></tr>
+    <tr><td>Phase 1 Table 8</td><td>Front end in strict TypeScript instead of JavaScript.</td><td>Shared types make a UI/API mismatch a build error (supports NFR-15).</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="chap">
+<h2><span class="no">8</span>Coverage summary and open items</h2>
+<table>
+  <thead><tr><th>Group</th><th class="c">Total</th><th class="c">Met</th><th class="c">Partly met</th><th class="c">Not measured</th><th class="c">Deferred</th></tr></thead>
+  <tbody>
+    <tr><td>Must-have FR</td><td class="c">24</td><td class="c">24</td><td class="c">–</td><td class="c">–</td><td class="c">–</td></tr>
+    <tr><td>Should-have FR</td><td class="c">4</td><td class="c">3</td><td class="c">1 (FR-16)</td><td class="c">–</td><td class="c">–</td></tr>
+    <tr><td>Could-have FR</td><td class="c">2</td><td class="c">2</td><td class="c">–</td><td class="c">–</td><td class="c">–</td></tr>
+    <tr><td>Won’t-have FR-F1…F4</td><td class="c">4</td><td class="c">–</td><td class="c">–</td><td class="c">–</td><td class="c">4</td></tr>
+    <tr><td>Non-functional NFR</td><td class="c">18</td><td class="c">14</td><td class="c">1 (NFR-12)</td><td class="c">3 (NFR-01…03)</td><td class="c">–</td></tr>
+    <tr><td>Acceptance tests TC</td><td class="c">8</td><td class="c">8 pass</td><td class="c">–</td><td class="c">–</td><td class="c">–</td></tr>
+  </tbody>
+</table>
+
+<h3>8.1 Open items (technical debt affecting requirements)</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:30%">Item</th><th style="width:16%">Requirement</th><th>Remedy</th></tr></thead>
+  <tbody>
+    <tr><td>TD-01</td><td>No automated load test</td><td>NFR-01…03, FR-16</td><td>Locust script with a 1,000-product seed and 10+ simulated tills.</td></tr>
+    <tr><td>TD-02</td><td>No front-end unit tests</td><td>FR-20</td><td>Vitest + React Testing Library for the basket and payment modal.</td></tr>
+    <tr><td>TD-03</td><td>No lock-out after wrong PINs</td><td>NFR-09</td><td>Temporary lock or rate limit after five failures.</td></tr>
+    <tr><td>TD-04</td><td>UPI confirmed by the cashier</td><td>FR-28 (by design)</td><td>Payment gateway with webhooks (FR-F1).</td></tr>
+    <tr><td>TD-05</td><td>Free-tier cold start of 30–60 s</td><td>NFR-02</td><td>Always-on paid instance for real use.</td></tr>
+    <tr><td>TD-06</td><td>No token revocation except deactivation</td><td>NFR-08</td><td>Short-lived token with refresh, or a deny list.</td></tr>
+    <tr><td>TD-07</td><td>Staff names visible on the login screen</td><td>NFR-07</td><td>Device pairing code before the list is shown.</td></tr>
+    <tr><td>TD-08</td><td>PostgreSQL 16 locally, 18 in the cloud</td><td>NFR-14</td><td>Pin both to one major version.</td></tr>
+    <tr><td>TD-09</td><td>Basket preview uses JavaScript numbers</td><td>FR-21, TR-04</td><td>Integer-paise arithmetic in the client; the stored bill is already Decimal.</td></tr>
+    <tr><td>TD-10</td><td>Cash sale needs the amount typed</td><td>NFR-12</td><td>Quick-amount buttons (exact, ₹100, ₹200, ₹500).</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="chap">
+<h2><span class="no">9</span>Glossary</h2>
+<p>Terms from the Phase 1 glossary (Table 11), extended with terms introduced during implementation (marked ⁺).</p>
+<table class="gloss">
+  <thead><tr><th style="width:24%">Term</th><th>Definition</th></tr></thead>
+  <tbody>
+    <tr><td>ACID</td><td>Atomicity, Consistency, Isolation, Durability – the guarantees of a database transaction, so a bill and its stock changes commit or roll back as one unit.</td></tr>
+    <tr><td>Alembic</td><td>Migration tool for SQLAlchemy that version-controls changes to the database schema.</td></tr>
+    <tr><td>Archive (product)</td><td>Deactivating a product so it disappears from the Register but stays on historical bills; products are never deleted.</td></tr>
+    <tr><td>Bill / Order</td><td>A completed sale: line items, subtotal, GST, total, payment and a unique bill number.</td></tr>
+    <tr><td>Bill line</td><td>One item on a bill, storing quantity and the unit price at the time of sale.</td></tr>
+    <tr><td>Blueprint ⁺</td><td>Render’s infrastructure-as-code file (<code>render.yaml</code>) that defines the cloud services of the application.</td></tr>
+    <tr><td>Cashier</td><td>Counter staff role: Register, payment and bill history, but no product, stock or staff management.</td></tr>
+    <tr><td>Cold start ⁺</td><td>The delay when a sleeping free-tier service is woken by the first request (about 30–60 s).</td></tr>
+    <tr><td>Decimal ⁺</td><td>Python’s exact decimal number type, used for all money; stored as <code>NUMERIC(10,2)</code>.</td></tr>
+    <tr><td>Docker Compose</td><td>Tool that runs front end, back end and database as linked containers with one command.</td></tr>
+    <tr><td>FastAPI</td><td>Python web framework used for the REST API, with built-in validation.</td></tr>
+    <tr><td>GST</td><td>Goods and Services Tax – 5 % on the subtotal, rounded half-up to two decimals.</td></tr>
+    <tr><td>JWT</td><td>JSON Web Token – signed token issued at login and sent with each request to prove identity and role.</td></tr>
+    <tr><td>Ledger (stock ledger)</td><td>The append-only <code>stock_<wbr>moves</code> table, the single source of truth for every stock change.</td></tr>
+    <tr><td>Manager</td><td>Owner/manager role with full access: products, inventory, staff, totals and the Register.</td></tr>
+    <tr><td>Migration ⁺</td><td>A numbered Alembic script that changes the schema (0001 initial schema, 0002 product photos).</td></tr>
+    <tr><td>MoSCoW</td><td>Prioritisation: Must have, Should have, Could have, Won’t have this time.</td></tr>
+    <tr><td>Neon ⁺</td><td>Managed PostgreSQL service hosting the cloud database.</td></tr>
+    <tr><td>POS</td><td>Point of Sale – where an order is rung up and paid; here, the Register screen.</td></tr>
+    <tr><td>PostgreSQL</td><td>The relational database, chosen for ACID transactions and row-level locking.</td></tr>
+    <tr><td>Pydantic ⁺</td><td>Python library that validates every request body and query against a typed schema.</td></tr>
+    <tr><td>RBAC</td><td>Role-Based Access Control – permissions by role, enforced on the server.</td></tr>
+    <tr><td>React</td><td>JavaScript library used to build the single-page front end, written in TypeScript.</td></tr>
+    <tr><td>Release gate ⁺</td><td>A test that must pass before a release: the concurrency and rollback tests in <code>test_<wbr>billing_<wbr>gates.py</code>.</td></tr>
+    <tr><td>Reorder level</td><td>Per-product threshold at or below which a low-stock badge is shown.</td></tr>
+    <tr><td>Row-level locking</td><td>Database mechanism (<code>SELECT … FOR UPDATE</code>) that serialises concurrent updates to the same product row.</td></tr>
+    <tr><td>Sequence ⁺</td><td>PostgreSQL counter object (<code>bill_<wbr>no_<wbr>seq</code>) that issues bill numbers; values are not returned on rollback.</td></tr>
+    <tr><td>SPA</td><td>Single-Page Application – loads once and updates views without full page reloads.</td></tr>
+    <tr><td>Stock movement</td><td>One immutable ledger entry: quantity change, reason (OPENING, RECEIVE, REMOVE, SALE), user, time and optional bill.</td></tr>
+    <tr><td>Technical debt ⁺</td><td>A known shortcut or gap, recorded with an ID (TD-xx) and a remedy.</td></tr>
+    <tr><td>Traceability ⁺</td><td>The link from a requirement to the code that implements it and the test that verifies it.</td></tr>
+    <tr><td>TypeScript ⁺</td><td>Typed superset of JavaScript; under <code>strict</code> mode a type mismatch fails the build.</td></tr>
+    <tr><td>UPI</td><td>Unified Payments Interface – India’s real-time payment system; here used through a static QR code.</td></tr>
+    <tr><td>Waterfall model</td><td>Process with sequential phases (requirements, design, implementation, testing, deployment), each completed before the next.</td></tr>
+  </tbody>
+</table>
+
+<h2 style="margin-top:16pt"><span class="no">10</span>References</h2>
+<ul class="refs">
+  <li>Mysore Jagannath, P. (2026). <i>Tulsi Tiffins POS – Project Report, Phase 1: Conception Phase</i> (v0.1.0). IU International University of Applied Sciences.</li>
+  <li>Mysore Jagannath, P. (2026). <i>Tulsi Tiffins POS – Software and System Architecture Documentation</i> (v1.0.0). IU International University of Applied Sciences.</li>
+  <li>Object Management Group. (2017). <i>Unified Modeling Language, Version 2.5.1</i>. https://www.omg.org/spec/UML/2.5.1</li>
+  <li>PostgreSQL Global Development Group. (n.d.). <i>PostgreSQL 16 Documentation – Explicit Locking</i>. https://www.postgresql.org/docs/16/explicit-locking.html</li>
+  <li>Royce, W. W. (1970). Managing the development of large software systems. <i>Proceedings of IEEE WESCON</i>, 1–9.</li>
+  <li>Sommerville, I. (2016). <i>Software Engineering</i> (10th ed.). Pearson.</li>
+</ul>
+</section>
+
+</body>
+</html>
