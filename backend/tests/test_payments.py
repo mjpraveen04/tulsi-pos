@@ -87,6 +87,32 @@ def test_short_cash_is_rejected_and_nothing_is_written(
     assert db.get(type(product), product.id).stock == 10
 
 
+def test_short_cash_does_not_burn_a_bill_number(client, cashier, make_product, auth_headers):
+    """FR-24: a rejected payment must not leave a gap in the bill series.
+
+    Postgres sequences are not rolled back, so the check has to run before the
+    number is taken — not just before the commit.
+    """
+    product = make_product("Masala Chai", "25", 80)
+    headers = auth_headers(cashier, "1111")
+
+    def sell(tendered: str):
+        return client.post(
+            "/api/bills",
+            json={
+                "lines": [{"product_id": product.id, "qty": 1}],
+                "payment": {"method": "CASH", "tendered": tendered},
+            },
+            headers=headers,
+        )
+
+    first = sell("100.00").json()["bill_no"]
+    assert sell("1.00").status_code == 400
+    second = sell("100.00").json()["bill_no"]
+
+    assert second == first + 1
+
+
 def test_cash_without_a_tendered_amount_is_rejected(client, cashier, make_product, auth_headers):
     product = make_product("Upma", "60", 12)
 

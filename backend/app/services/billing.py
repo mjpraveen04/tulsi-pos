@@ -57,6 +57,20 @@ def _lock_products(db: Session, product_ids: list[int]) -> dict[int, Product]:
     return {p.id: p for p in rows}
 
 
+def _check_tendered(payment: PaymentIn, total: Decimal) -> None:
+    """Short cash is rejected before a bill number is taken (FR-24, FR-27).
+
+    Postgres sequences are not rolled back, so failing after `nextval` would
+    leave a permanent gap in the bill series.
+    """
+    if payment.method is PaymentMethod.CASH:
+        tendered = money.quantize(payment.tendered or Decimal("0"))
+        if tendered < total:
+            raise ValidationError(
+                f"Amount received (₹{tendered}) is less than the total (₹{total})."
+            )
+
+
 def _record_payment(db: Session, bill: Bill, payment: PaymentIn, total: Decimal) -> Payment:
     """Cash captures what was handed over and returns the change (FR-27).
 
@@ -68,10 +82,6 @@ def _record_payment(db: Session, bill: Bill, payment: PaymentIn, total: Decimal)
 
     if payment.method is PaymentMethod.CASH:
         tendered = money.quantize(payment.tendered or Decimal("0"))
-        if tendered < total:
-            raise ValidationError(
-                f"Amount received (₹{tendered}) is less than the total (₹{total})."
-            )
         change_due = money.quantize(tendered - total)
 
     row = Payment(
@@ -122,6 +132,7 @@ def create_bill(db: Session, cashier: User, payload: BillCreate) -> Bill:
             computed.append((product, qty, unit_price, total_for_line))
 
         subtotal, gst, total = money.totals(subtotal)
+        _check_tendered(payload.payment, total)
 
         # 5. Allocate the bill number only now that the sale is going to happen.
         bill = Bill(
