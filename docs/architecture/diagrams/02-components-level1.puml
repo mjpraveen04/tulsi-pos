@@ -1,0 +1,39 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Component Diagram – Building block view, level 1
+skinparam componentStyle uml2
+left to right direction
+
+actor "Cashier /\nManager" as user
+component "Web front end\n<<SPA>>\nReact 18 · TypeScript" as web
+component "API\n<<service>>\nFastAPI · Python 3.11" as api
+database "PostgreSQL" as db
+
+interface "UI\n(HTTPS)" as ui
+interface "REST API\n/api/* + JWT" as rest
+interface "Photos\n/media/*" as media
+interface "SQL" as sql
+
+user ..> ui
+web -up- ui
+web ..> rest : <<use>>
+web ..> media : <<use>>
+api -up- rest
+api -up- media
+api ..> sql : <<use>>
+db -up- sql
+
+note bottom of db
+  Only the API talks to the database.
+  Row locks and CHECK (stock >= 0)
+  stop overselling (NFR-04).
+end note
+
+legend bottom
+  |= Notation |= Meaning |
+  | box with component icon | component (replaceable building block) |
+  | ○— (lollipop) | interface provided by the component it touches |
+  | - - -> <<use>> | the source requires that interface |
+  | cylinder | data store |
+endlegend
+@enduml

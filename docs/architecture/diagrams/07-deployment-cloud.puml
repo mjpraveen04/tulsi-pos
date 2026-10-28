@@ -1,0 +1,47 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Deployment Diagram – Cloud (Render + Neon, release v1.0.0)
+
+node "Café tablet" <<device>> {
+  node "Web browser" <<execution environment>> as br {
+    artifact "SPA bundle\n(index.html, JS, CSS)" as spaRun
+  }
+}
+
+cloud "Render" {
+  node "tulsi-web" <<static site / CDN>> as web {
+    artifact "frontend/dist" as dist
+    artifact "rewrite rules\n/api/*, /media/* → tulsi-api\n/* → index.html" as rw
+  }
+  node "tulsi-api" <<Docker container, free web service>> as apiNode {
+    artifact "backend image\n(python:3.11-slim)" as img
+    component "uvicorn + FastAPI" as fast
+  }
+}
+
+cloud "Neon (AWS eu-central-1)" {
+  node "Neon compute" <<PostgreSQL 18>> as neon {
+    database "neondb" as ndb
+  }
+}
+
+br -- web : HTTPS\ntulsi-web.onrender.com
+web -- apiNode : HTTPS (rewrite)\ntulsi-api-4343.onrender.com
+apiNode -- neon : TLS 5432\nsslmode=require
+dist ..> spaRun : <<deploy>>
+
+note bottom of apiNode
+  On start: alembic upgrade head → idempotent seed → uvicorn.
+  Free tier sleeps after 15 min idle (≈ 30–60 s cold start).
+  Disk is ephemeral, so photos are stored in PostgreSQL.
+end note
+
+legend right
+  |= Notation |= Meaning |
+  | 3-D box | node (device or execution environment) |
+  | dog-ear box | artifact deployed on a node |
+  | cloud | hosting provider boundary |
+  | —— | communication path (protocol) |
+  | - - -> <<deploy>> | artifact is delivered to that node |
+endlegend
+@enduml

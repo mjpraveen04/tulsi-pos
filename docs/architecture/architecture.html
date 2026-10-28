@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tulsi Tiffins POS – Architecture Documentation v1.0.0</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  @page :first { margin: 0; }
+  :root {
+    --green: #418d59; --green-dark: #2d6a41; --green-soft: #e7f2ea; --green-line: #b9d8c3;
+    --saffron: #d98a1f; --saffron-soft: #fcefdc; --ink: #1f2421; --muted: #5d645f;
+    --rule: #d9ddd9; --paper: #faf9f5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+         font-size: 10.2pt; line-height: 1.5; }
+  p { margin: 0 0 7pt; text-align: justify; hyphens: auto; }
+  h1 { font-size: 19pt; margin: 0 0 4pt; color: var(--green-dark); letter-spacing: -0.2px; }
+  h2 { font-size: 14pt; color: var(--green-dark); margin: 0 0 8pt; padding-bottom: 4pt;
+       border-bottom: 2px solid var(--green); break-after: avoid; }
+  h2 .no { color: var(--saffron); margin-right: 6pt; }
+  h3 { font-size: 11.2pt; margin: 12pt 0 5pt; break-after: avoid; }
+  section.chap { break-before: page; }
+  ul { margin: 0 0 7pt; padding-left: 15pt; } li { margin-bottom: 2.5pt; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.6pt; background: var(--paper);
+         padding: 0 2px; border-radius: 2px; }
+  b { font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 9pt; font-size: 8.7pt; line-height: 1.35;
+          break-inside: auto; }
+  th { background: var(--green); color: #fff; text-align: left; font-weight: 600; padding: 4pt 6pt; vertical-align: bottom; }
+  td { padding: 3.5pt 6pt; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr { break-inside: avoid; }
+  tbody tr:nth-child(even) td { background: var(--paper); }
+  td.c, th.c { text-align: center; }
+  .tcap { font-size: 8.6pt; color: var(--muted); margin: 2pt 0 2pt; font-weight: 600; }
+  figure { margin: 6pt 0 12pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--rule); border-radius: 6px; padding: 6pt; background: #fff; }
+  figcaption { font-size: 8.6pt; color: var(--muted); margin-top: 4pt; text-align: center; }
+  figcaption b { color: var(--ink); }
+  .notation { display: inline-block; font-size: 7.8pt; font-weight: 600; color: var(--green-dark);
+              background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 99px;
+              padding: 0 7px; margin-left: 4px; }
+  .box { border: 1px solid var(--rule); border-left: 4px solid var(--green); background: var(--paper);
+         border-radius: 0 6px 6px 0; padding: 7pt 10pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  .box.warn { border-left-color: var(--saffron); background: #fffaf2; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .k { font-size: 8pt; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); }
+  .y { color: var(--green-dark); font-weight: 700; }
+  .p { color: #9a5a00; font-weight: 700; }
+  .n { color: #a33; font-weight: 700; }
+  .chosen td { background: var(--green-soft) !important; }
+  .chosen td:first-child { font-weight: 700; }
+  /* cover */
+  .cover { width: 210mm; height: 296mm; position: relative; break-after: page; overflow: hidden; }
+  .cover .band { position: absolute; right: 0; top: 0; width: 68mm; height: 100%; background: var(--green); }
+  .cover .logo { position: absolute; right: 13mm; top: 58mm; }
+  .cover .meta { position: absolute; left: 22mm; bottom: 24mm; width: 112mm; font-size: 9.2pt; }
+  .cover .meta td { border: 0; padding: 2pt 0; background: none !important; }
+  .cover .meta td:first-child { color: var(--muted); width: 34mm; }
+  .toc { columns: 1; font-size: 10pt; }
+  .toc div { display: flex; border-bottom: 1px dotted var(--rule); padding: 3pt 0; }
+  .toc div span:first-child { width: 10mm; color: var(--saffron); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="band"></div>
+  <svg class="logo" width="150" height="150" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="17" fill="#fff"/>
+    <text x="32" y="27.5" text-anchor="middle" dominant-baseline="central" font-family="'Devanagari Sangam MN','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif" font-size="44" font-weight="700" fill="#418d59">तु</text>
+  </svg>
+  <div style="position:absolute;left:22mm;top:48mm;width:112mm">
+    <div class="k">IU · Project: Software Engineering (CSEMCSPSE01) · Portfolio Part 3</div>
+    <div style="font-size:30pt;font-weight:600;line-height:1.1;margin-top:14mm;letter-spacing:-0.6px">Tulsi Tiffins POS</div>
+    <div style="font-size:15pt;color:var(--muted);margin-top:4mm;line-height:1.3">Software and System Architecture Documentation</div>
+    <div style="width:22mm;height:3px;background:var(--saffron);margin:10mm 0 8mm"></div>
+    <div style="font-size:11pt;line-height:1.55">Structure based on the arc42 template (Starke &amp; Hruschka). Every diagram is drawn in <b>UML 2.5</b>, names its diagram type in its title and carries its own notation legend.</div>
+  </div>
+  <table class="meta">
+    <tr><td>Author</td><td><b>Praveen Mysore Jagannath</b> · 10251728</td></tr>
+    <tr><td>Tutor</td><td>Niknejad, Naghmeh</td></tr>
+    <tr><td>Document version</td><td><b>1.0.0</b> (matches software release v1.0.0)</td></tr>
+    <tr><td>Date</td><td>28 October 2026</td></tr>
+    <tr><td>Source code</td><td>github.com/mjpraveen04/tulsi-pos</td></tr>
+    <tr><td>Live application</td><td>https://tulsi-web.onrender.com</td></tr>
+    <tr><td>Diagram sources</td><td><code>docs/architecture/diagrams/*.puml</code> (PlantUML), versioned with the code</td></tr>
+  </table>
+</div>
+
+<!-- ============ TOC + HISTORY ============ -->
+<h1>Contents</h1>
+<div class="toc" style="margin:8pt 0 16pt">
+  <div><span>1</span>Introduction and quality goals</div>
+  <div><span>2</span>Constraints</div>
+  <div><span>3</span>System scope and context</div>
+  <div><span>4</span>Solution strategy and technology decisions (why this stack, and not the alternatives)</div>
+  <div><span>5</span>Building block view</div>
+  <div><span>6</span>Runtime view</div>
+  <div><span>7</span>Deployment view</div>
+  <div><span>8</span>Data model</div>
+  <div><span>9</span>Cross-cutting concepts</div>
+  <div><span>10</span>Architecture decision records</div>
+  <div><span>11</span>Quality and testing</div>
+  <div><span>12</span>Risks and technical debt</div>
+  <div><span>A</span>Appendix: REST API contract</div>
+</div>
+
+<h3>Version history</h3>
+<p>The documentation is versioned together with the software: it lives in the repository under <code>docs/architecture/</code>, and every release tag freezes code, diagrams and this document together.</p>
+<table>
+  <thead><tr><th style="width:15%">Version</th><th style="width:17%">Date</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr><td>0.1.0</td><td>3 Aug 2026</td><td>Phase 1 conception: requirements baseline (FR-01…30, NFR-01…18), use case and domain model, C4 context and container views.</td></tr>
+    <tr><td>0.2.0</td><td>13 Aug 2026</td><td>Phase 2 development: implemented architecture, schema (migration 0001), sale sequence, 118 automated tests.</td></tr>
+    <tr><td>0.9.0</td><td>26 Oct 2026</td><td>Front end migrated to strict TypeScript; repository published on GitHub.</td></tr>
+    <tr><td><b>1.0.0</b></td><td>28 Oct 2026</td><td>Phase 3 final: all diagrams redrawn in named UML 2.5 notation with legends (tutor feedback); technology decisions compared against alternatives (tutor feedback); cloud deployment on Render + Neon; photos moved into PostgreSQL (migration 0002); bill-number gap fix; 120 tests.</td></tr>
+  </tbody>
+</table>
+
+<div class="box">
+  <div class="k" style="margin-bottom:3pt">How the Phase 2 feedback is addressed in this document</div>
+  <ul>
+    <li><b>“Explain why this stack and not one of the alternatives”</b> → Section 4: the selection criteria are derived from the requirements, and every technology is compared against two to four realistic alternatives with the deciding reason.</li>
+    <li><b>“Indicate the notation standard of each diagram, or include a legend”</b> → every figure names its UML 2.5 diagram type in its title and caption <span class="notation">UML 2.5 …</span> and has an embedded legend explaining each symbol used.</li>
+  </ul>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="chap">
+<h2><span class="no">1</span>Introduction and quality goals</h2>
+<p><b>Tulsi Tiffins POS</b> is a browser-based point-of-sale and inventory system for a small South Indian tiffin café. A cashier rings up an order on a tablet by tapping photo cards, takes cash or UPI and receives an exact receipt; a manager maintains the menu and its photos, receives stock, manages staff and reviews the day’s sales. The system replaces a paper bill book, a calculator and a hand-counted stock list.</p>
+<p>This document describes the implemented architecture of release v1.0.0. Requirement identifiers (FR-xx, NFR-xx, TR-xx, BR-xx) are unchanged from the Phase 1 baseline so that every decision can be traced back to the requirement that motivated it.</p>
+
+<h3>1.1 Quality goals</h3>
+<p>The three quality goals below drive every architectural decision in this document, in this order of priority.</p>
+<table>
+  <thead><tr><th style="width:5%">#</th><th style="width:20%">Quality goal</th><th>Scenario that must hold</th><th style="width:16%">Requirements</th></tr></thead>
+  <tbody>
+    <tr><td>Q1</td><td><b>Correct stock and money</b></td><td>Two tills sell the last Masala Dosa at the same moment: exactly one sale succeeds, stock never goes below zero, a failed sale leaves no trace, and every ₹ amount is exact to the paisa.</td><td>FR-22…25, NFR-04/05/06, TR-01/04</td></tr>
+    <tr><td>Q2</td><td><b>Security of a shared till</b></td><td>A cashier on a shared tablet cannot reach manager functions even by calling the API directly; PINs are never stored readably; a deactivated user loses access immediately.</td><td>FR-04/06/07, NFR-07…11</td></tr>
+    <tr><td>Q3</td><td><b>Speed at the counter</b></td><td>A typical bill takes four taps or fewer on a tablet, with large touch targets and plain-language error messages.</td><td>NFR-12/13, FR-19…21</td></tr>
+  </tbody>
+</table>
+
+<h3>1.2 Stakeholders</h3>
+<table>
+  <thead><tr><th style="width:22%">Stakeholder</th><th>Expectation of the architecture</th></tr></thead>
+  <tbody>
+    <tr><td>Cashier</td><td>A fast, obvious Register that never lets an item be sold twice and shows the change due.</td></tr>
+    <tr><td>Manager / owner</td><td>Trustworthy stock figures with an audit trail, correct daily totals, control over staff access.</td></tr>
+    <tr><td>Developer (solo)</td><td>A small, layered code base that one person can build, test and deploy within the course timeline.</td></tr>
+    <tr><td>Tutor / examiner</td><td>Traceability from requirements to code and tests, comprehensible diagrams, a running cloud instance.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 2 ============ -->
+<h2 style="margin-top:16pt"><span class="no">2</span>Constraints</h2>
+<table>
+  <thead><tr><th style="width:24%">Constraint</th><th>Consequence for the architecture</th></tr></thead>
+  <tbody>
+    <tr><td>Must run in a web browser (IU brief)</td><td>Single-page web application; no native tablet app.</td></tr>
+    <tr><td>Docker Compose configuration required (IU brief)</td><td>Three containers (web, api, db) started by one command (NFR-14).</td></tr>
+    <tr><td>Cloud-hosted front end required (IU brief)</td><td>A free host that builds the same Dockerfiles; see Section 7.</td></tr>
+    <tr><td>One developer, fixed schedule, Waterfall plan</td><td>Mainstream, well-documented technologies; no microservices; a scope frozen with MoSCoW (BR-01).</td></tr>
+    <tr><td>Zero budget</td><td>Open-source stack, free hosting tiers, no paid payment gateway (UPI via static QR, FR-28).</td></tr>
+    <tr><td>Indian café context</td><td>₹ amounts, 5 % GST rounded half-up to two decimals, cash and UPI side by side.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 3 ============ -->
+<section style="margin-top:16pt">
+<h2><span class="no">3</span>System scope and context</h2>
+<p>Figure 1 fixes the system boundary. Two human roles use the system; the Manager role is a specialisation of the Cashier role, so a manager can also ring up sales (FR-05). The customer’s UPI app is the only external party: it scans a static QR code generated by the system, and the cashier confirms receipt manually (FR-28). There is deliberately <b>no</b> automated link to a payment gateway, supplier or accounting system — these are the frozen Won’t-have items FR-F1…F4.</p>
+
+<table>
+  <thead><tr><th style="width:22%">Neighbour</th><th style="width:22%">Interface</th><th>Exchanged information</th></tr></thead>
+  <tbody>
+    <tr><td>Cashier, Manager</td><td>Web browser on a tablet, HTTPS</td><td>PIN login, orders, payments, menu, stock, staff and reports.</td></tr>
+    <tr><td>Customer’s UPI app</td><td>Printed / on-screen QR code (no network link)</td><td><code>upi://pay?pa=…&amp;pn=…&amp;am=…</code> — payee, name and amount. Confirmation is manual.</td></tr>
+  </tbody>
+</table>
+<figure>
+  <img src="diagrams/png/01-use-cases.png" style="width:46%">
+  <figcaption><b>Figure 1:</b> System scope and actors <span class="notation">UML 2.5 use case diagram</span></figcaption>
+</figure>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="chap">
+<h2><span class="no">4</span>Solution strategy and technology decisions</h2>
+<p>The Phase 2 slides listed the characteristics of each technology. This section answers the more important question: <b>why this combination, and not one of the many alternatives?</b> The method is the same for every concern: derive selection criteria from the requirements, list the realistic alternatives, rate each against the criteria, and record the deciding reason.</p>
+
+<h3>4.1 Selection criteria</h3>
+<table>
+  <thead><tr><th style="width:7%">ID</th><th style="width:28%">Criterion</th><th>Why it matters here</th><th style="width:16%">Source</th></tr></thead>
+  <tbody>
+    <tr><td>K1</td><td><b>Transactional correctness</b></td><td>Lock a product row, check stock, write bill + lines + payment + moves, commit or roll back as one unit. This is quality goal Q1 and the top technical risk.</td><td>NFR-04/05, TR-01/02</td></tr>
+    <tr><td>K2</td><td><b>Exact decimal money</b></td><td>₹ amounts and 5 % GST must never pass through binary floating point.</td><td>TR-04, FR-21</td></tr>
+    <tr><td>K3</td><td><b>Validated, typed API contract</b></td><td>Every input validated on the server; the UI and the API must not drift apart.</td><td>NFR-10, NFR-15</td></tr>
+    <tr><td>K4</td><td><b>Delivery risk for one developer</b></td><td>Existing Python experience, quality of documentation, amount of glue code to write.</td><td>BR-03, constraint 2</td></tr>
+    <tr><td>K5</td><td><b>Zero cost, open source</b></td><td>No licences, free hosting tiers.</td><td>Constraint 2</td></tr>
+    <tr><td>K6</td><td><b>Deployability</b></td><td>One-command install, container images, free cloud hosting available.</td><td>NFR-14/15/17</td></tr>
+  </tbody>
+</table>
+<p style="font-size:8.6pt;color:var(--muted)"><b>Legend for the comparison tables below:</b> <span class="y">●</span> fully meets the criterion · <span class="p">◐</span> meets it with extra work or with a limitation · <span class="n">○</span> does not meet it. The green row is the chosen option.</p>
+
+<h3>4.2 Backend framework</h3>
+<table>
+  <thead><tr><th style="width:21%">Option</th><th class="c">K1</th><th class="c">K2</th><th class="c">K3</th><th class="c">K4</th><th class="c">K6</th><th style="width:47%">Deciding reason</th></tr></thead>
+  <tbody>
+    <tr class="chosen"><td>FastAPI (Python)</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td>Pydantic validates every request body and query (NFR-10) and generates the OpenAPI contract for free; Python’s <code>decimal</code> is built in; the framework adds no ORM of its own, so the transaction is controlled explicitly through SQLAlchemy.</td></tr>
+    <tr><td>Django + DRF</td><td class="c y">●</td><td class="c y">●</td><td class="c p">◐</td><td class="c p">◐</td><td class="c y">●</td><td>Strong and mature, but brings server-side templates, admin and session auth that a JSON API for an SPA does not need; DRF serialisers are a second validation layer to learn. More framework than the five screens justify.</td></tr>
+    <tr><td>Flask</td><td class="c y">●</td><td class="c y">●</td><td class="c n">○</td><td class="c p">◐</td><td class="c y">●</td><td>Minimal; validation, OpenAPI and dependency injection would all be hand-written glue — exactly the code that tends to hide security gaps.</td></tr>
+    <tr><td>Node.js (Express / NestJS)</td><td class="c y">●</td><td class="c p">◐</td><td class="c y">●</td><td class="c p">◐</td><td class="c y">●</td><td>JavaScript has no native decimal type (<code>0.1 + 0.2 ≠ 0.3</code>); every ₹ calculation would need a third-party decimal library and discipline to never touch <code>Number</code>.</td></tr>
+    <tr><td>Spring Boot (Java)</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td class="c n">○</td><td class="c p">◐</td><td>Technically excellent (<code>BigDecimal</code>, JPA locking), but the heaviest set-up and memory footprint — a free 512 MB cloud instance is tight — and outside the developer’s experience.</td></tr>
+  </tbody>
+</table>
+
+<h3>4.3 Database</h3>
+<table>
+  <thead><tr><th style="width:21%">Option</th><th class="c">K1</th><th class="c">K2</th><th class="c">K5</th><th class="c">K6</th><th style="width:55%">Deciding reason</th></tr></thead>
+  <tbody>
+    <tr class="chosen"><td>PostgreSQL</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td><code>SELECT … FOR UPDATE</code> row locks, <code>CHECK (stock &gt;= 0)</code>, exact <code>NUMERIC(10,2)</code>, real sequences for bill numbers (FR-24) and <b>transactional DDL</b>, so a failed Alembic migration rolls back cleanly. Free managed hosting exists (Neon).</td></tr>
+    <tr><td>MySQL 8 / MariaDB</td><td class="c y">●</td><td class="c y">●</td><td class="c y">●</td><td class="c p">◐</td><td>A genuine alternative (InnoDB row locks, CHECK since 8.0.16). Rejected because DDL is not transactional — a half-applied migration must be repaired by hand — and fewer free managed offers without a time limit.</td></tr>
+    <tr><td>SQLite</td><td class="c n">○</td><td class="c p">◐</td><td class="c y">●</td><td class="c p">◐</td><td>No <code>SELECT … FOR UPDATE</code>; one lock for the whole file; no network access for several tills; <code>NUMERIC</code> is stored as float affinity. Cannot prove NFR-04 at all.</td></tr>
+    <tr><td>MongoDB</td><td class="c p">◐</td><td class="c p">◐</td><td class="c y">●</td><td class="c y">●</td><td>Bills, lines, products and moves are strongly relational; multi-document transactions and schema validation exist but are add-ons, and there is no declarative CHECK on a counter.</td></tr>
+  </tbody>
+</table>
+
+<h3>4.4 Data access and migrations</h3>
+<table>
+  <thead><tr><th style="width:24%">Option</th><th style="width:76%">Assessment</th></tr></thead>
+  <tbody>
+    <tr class="chosen"><td>SQLAlchemy 2 + Alembic</td><td>Explicit session and transaction control — the billing service decides exactly where <code>BEGIN</code>, the locks and <code>COMMIT</code> happen; <code>with_for_update()</code> maps directly to the lock; Alembic gives versioned, reviewable migrations (NFR-17).</td></tr>
+    <tr><td>Raw SQL (psycopg2)</td><td>Full control, but every query, mapping and migration by hand; more code for one developer and easier to get wrong.</td></tr>
+    <tr><td>SQLModel / Tortoise ORM</td><td>SQLModel is a thin layer over SQLAlchemy with less documentation for locking; Tortoise is async-only and less mature. No benefit over the underlying library.</td></tr>
+  </tbody>
+</table>
+
+<h3>4.5 Front end</h3>
+<table>
+  <thead><tr><th style="width:23%">Option</th><th class="c">K3</th><th class="c">K4</th><th style="width:63%">Deciding reason</th></tr></thead>
+  <tbody>
+    <tr class="chosen"><td>React 18 + TypeScript (strict) + Vite</td><td class="c y">●</td><td class="c y">●</td><td>The Register is a rich client: a live basket, quantity steppers, a payment modal and stock badges that refresh after each sale. React’s component model maps one-to-one onto the prototype’s cards; strict TypeScript with <code>types.ts</code> mirroring the Pydantic schemas turns API drift into a build error; TanStack Query refetches stock after a sale.</td></tr>
+    <tr><td>Vue 3 + TypeScript</td><td class="c y">●</td><td class="c y">●</td><td>Would also have met every requirement. React was chosen for its larger ecosystem (TanStack Query, React Router) and because the prototype was already structured as React-style components.</td></tr>
+    <tr><td>Angular</td><td class="c y">●</td><td class="c n">○</td><td>Complete framework with modules, DI and RxJS — a steep learning curve and a large bundle for five screens.</td></tr>
+    <tr><td>Server-rendered (Jinja / HTMX)</td><td class="c n">○</td><td class="c y">●</td><td>Simplest to deploy, but the front end would no longer be independently deployable (NFR-15), and the basket state would require a round trip on every tap.</td></tr>
+  </tbody>
+</table>
+
+<h3>4.6 Authentication, security and payments</h3>
+<table>
+  <thead><tr><th style="width:18%">Concern</th><th style="width:22%">Chosen</th><th style="width:25%">Alternatives rejected</th><th>Deciding reason</th></tr></thead>
+  <tbody>
+    <tr><td>Session</td><td>Signed JWT (python-jose), 8 h</td><td>Server-side session cookies; OAuth / OpenID provider (Auth0, Keycloak)</td><td>Stateless, so no session store; bearer header avoids CSRF; one token per shift (NFR-08). An external identity provider would need e-mail accounts for counter staff who sign in with a 4-digit PIN on a shared tablet.</td></tr>
+    <tr><td>Revocation</td><td>Role and <code>is_active</code> re-read from the DB on every request</td><td>Trust the role claim inside the token</td><td>A deactivated user or a changed role takes effect at once, not after 8 hours (FR-11, NFR-11).</td></tr>
+    <tr><td>PIN storage</td><td>bcrypt via passlib</td><td>argon2; SHA-256; plaintext</td><td>bcrypt is salted and deliberately slow, which matters with only 10,000 possible PINs; argon2 would be equally valid but adds a native dependency. Fast hashes are trivially brute-forced (FR-07, NFR-09).</td></tr>
+    <tr><td>UPI payment</td><td>Static QR with <code>qrcode</code> + Pillow</td><td>Payment gateway (Razorpay, PhonePe) with webhooks</td><td>A gateway needs a merchant account, fees and a public webhook endpoint — out of scope (FR-F1). A static QR works offline and costs nothing.</td></tr>
+  </tbody>
+</table>
+
+<h3>4.7 Quality assurance, delivery and hosting</h3>
+<table>
+  <thead><tr><th style="width:18%">Concern</th><th style="width:22%">Chosen</th><th style="width:25%">Alternatives rejected</th><th>Deciding reason</th></tr></thead>
+  <tbody>
+    <tr><td>Tests</td><td>pytest against a real PostgreSQL</td><td>SQLite in memory; mocked repositories</td><td>The two release gates (concurrency, rollback) depend on real row locks and a real CHECK constraint. A faster fake database would pass tests that prove nothing.</td></tr>
+    <tr><td>Packaging</td><td>Docker Compose (3 containers)</td><td>Manual install script; Kubernetes</td><td>One command on any machine (NFR-14) and required by the IU brief; Kubernetes is operational overhead without benefit for one café.</td></tr>
+    <tr><td>Web server</td><td>nginx (local) / Render static site (cloud)</td><td>Serve the SPA from FastAPI</td><td>Keeps the front end independently deployable (NFR-15) and gives one origin, so no CORS is needed in production.</td></tr>
+    <tr><td>Cloud host</td><td>Render (Docker + static) with Neon PostgreSQL</td><td>Vercel; Render PostgreSQL; AWS / GCP VM</td><td>Render builds the existing Dockerfiles unchanged. Vercel would need the API rewritten as serverless functions. Render’s free PostgreSQL is deleted after 30 days — shorter than the grading period — whereas Neon’s free tier does not expire. A VM needs a credit card and manual patching.</td></tr>
+  </tbody>
+</table>
+
+<div class="box">
+  <div class="k" style="margin-bottom:3pt">Summary of the strategy</div>
+  <p>The stack is chosen around one hard problem: <b>a sale must be atomic and must never oversell</b>. PostgreSQL provides the guarantees (locks, CHECK, NUMERIC, sequences), SQLAlchemy makes the transaction explicit, FastAPI and Pydantic keep the boundary validated and typed, and a strictly typed React client keeps the contract honest at build time. Everything else — Docker, Render, Neon — is chosen to deploy exactly that, for free, with one command.</p>
+</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="chap">
+<h2><span class="no">5</span>Building block view</h2>
+<h3>5.1 Level 1 – the whole system</h3>
+<p>The system consists of three building blocks. The browser loads the SPA, which reaches the API only through two interfaces: the JSON REST API under <code>/api</code> and the photo endpoint under <code>/media</code>. Only the API talks to the database. In both deployments a proxy (nginx locally, Render rewrite rules in the cloud) serves SPA and API under one origin.</p>
+<figure>
+  <img src="diagrams/png/02-components-level1.png">
+  <figcaption><b>Figure 2:</b> Building block view, level 1 <span class="notation">UML 2.5 component diagram</span></figcaption>
+</figure>
+<table>
+  <thead><tr><th style="width:18%">Building block</th><th>Responsibility</th><th style="width:30%">Source</th></tr></thead>
+  <tbody>
+    <tr><td>Web front end</td><td>Five screens (Login, Register, Inventory, Orders, Staff); holds only UI state; all data via the API.</td><td><code>frontend/src</code> (TypeScript, strict)</td></tr>
+    <tr><td>API</td><td>Authentication, authorisation, validation and all business rules; the only writer of data.</td><td><code>backend/app</code> (Python 3.11)</td></tr>
+    <tr><td>Database</td><td>Persistent state, row locks, constraints, bill-number sequence, product photos.</td><td><code>backend/alembic/versions</code></td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Level 2 – backend layers</h3>
+<p>The API is strictly layered (NFR-16). Routers are thin HTTP adapters; services own every business rule and are the only code that opens transactions; models are only the mapping to tables. Services never import FastAPI — they raise domain errors that <code>app.main</code> translates into HTTP status codes and readable messages (NFR-13). The rule “no ORM query in any router” is checked in review; routers import model classes only as type hints.</p>
+<figure>
+  <img src="diagrams/png/03-backend-packages.png" style="width:80%">
+  <figcaption><b>Figure 3:</b> Backend layers and allowed dependencies <span class="notation">UML 2.5 package diagram</span></figcaption>
+</figure>
+<table>
+  <thead><tr><th style="width:18%">Service module</th><th>Responsibility</th><th style="width:20%">Requirements</th></tr></thead>
+  <tbody>
+    <tr><td>billing</td><td>The atomic sale: lock, check, price-at-sale, totals, bill number, lines, moves, payment, commit (Section 6).</td><td>FR-22…25, NFR-04/05</td></tr>
+    <tr><td>money</td><td>Decimal quantisation, line totals, GST half-up — the only place money is computed.</td><td>FR-21, TR-04</td></tr>
+    <tr><td>payments</td><td>Static UPI QR (PNG, base64) for a given amount.</td><td>FR-28</td></tr>
+    <tr><td>inventory</td><td>Product CRUD, archive, receive/remove as ledger moves, low-stock flag, photo attach.</td><td>FR-12…17, NFR-06</td></tr>
+    <tr><td>media</td><td>Validates, re-encodes and stores product photos in PostgreSQL.</td><td>FR-13 extension</td></tr>
+    <tr><td>orders</td><td>Bill history by date / number, receipts, daily totals.</td><td>FR-29/30</td></tr>
+    <tr><td>users, auth</td><td>Staff CRUD, PIN reset, deactivation, last-manager guard; PIN check and token issue.</td><td>FR-01…11</td></tr>
+  </tbody>
+</table>
+
+<h3>5.3 Level 2 – front end</h3>
+<p>The router wraps manager-only screens in a <code>RequireManager</code> guard — a convenience for the user, not a security boundary, because the API enforces every role on the server (NFR-11). All server data flows through TanStack Query and a single API client that attaches the JWT and turns error responses into readable messages. <code>types.ts</code> mirrors the Pydantic schemas, so a changed field breaks the build rather than a receipt.</p>
+<figure>
+  <img src="diagrams/png/04-frontend-components.png" style="width:90%">
+  <figcaption><b>Figure 4:</b> Front-end building blocks <span class="notation">UML 2.5 component diagram</span></figcaption>
+</figure>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="chap">
+<h2><span class="no">6</span>Runtime view</h2>
+<h3>6.1 Ringing up a sale (the critical scenario)</h3>
+<p>The sale is the one scenario where a design error would cost the café money, so it is implemented exactly once, in <code>services/billing.py</code>. Figure 5 shows its message sequence. Three details make it safe:</p>
+<ul>
+  <li><b>Lock before read, in a fixed order.</b> All product rows of the basket are locked with <code>SELECT … FOR UPDATE</code> in ascending id order. Two tills selling the last dosa queue on the same row lock; the second sees stock 0 and is rejected. Because every transaction locks in the same order, two overlapping baskets cannot deadlock.</li>
+  <li><b>Check everything before writing anything.</b> Stock for every line, archived items and short cash are all checked before the first INSERT — and before the bill number is taken, because a PostgreSQL sequence is not rolled back. (This last point was a defect found in Phase 3: short cash used to consume a bill number; it is now fixed and covered by a regression test.)</li>
+  <li><b>One commit.</b> Bill, lines with copied unit price, payment, one SALE stock move per line and the stock decrement are committed together; any exception rolls back all of it. The CHECK constraint remains as a backstop and is mapped to 409, never 500.</li>
+</ul>
+<figure>
+  <img src="diagrams/png/06-sequence-sale.png" style="width:78%">
+  <figcaption><b>Figure 5:</b> Ring up a sale <span class="notation">UML 2.5 sequence diagram</span></figcaption>
+</figure>
+
+<h3>6.2 Other scenarios</h3>
+<table>
+  <thead><tr><th style="width:20%">Scenario</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Log in</td><td>The login screen lists active staff names (<code>GET /api/users/pin-targets</code>); the user taps a name and enters a 4-digit PIN; the server verifies it with bcrypt and returns a JWT valid for one 8-hour shift. A wrong PIN returns 401 without saying which part was wrong.</td></tr>
+    <tr><td>Receive stock</td><td>The manager taps “+” on an item; the API inserts a RECEIVE move with a positive amount and updates the cached stock in the same transaction. The sign comes from the reason, so a negative “receive” cannot exist.</td></tr>
+    <tr><td>Change a price</td><td>Only the product row changes. Old bills are unaffected because each bill line holds its own copy of the unit price (FR-25).</td></tr>
+    <tr><td>Deactivate staff</td><td>The flag is set; the user’s next request fails with 401 because the role is re-read on every request. Deactivating the last active manager is refused.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 7 ============ -->
+<section style="margin-top:16pt">
+<h2><span class="no">7</span>Deployment view</h2>
+<p>The same container images run in two environments. The local installation is the reference required by the brief (<code>docker compose up</code>); the cloud deployment makes the front end directly accessible for evaluation. The application code is identical in both — only configuration differs, and all of it comes from environment variables.</p>
+<h3>7.1 Cloud – Render and Neon (live instance)</h3>
+<figure>
+  <img src="diagrams/png/07-deployment-cloud.png" style="width:47%">
+  <figcaption><b>Figure 6:</b> Cloud deployment of release v1.0.0 <span class="notation">UML 2.5 deployment diagram</span></figcaption>
+</figure>
+<ul>
+  <li><b>Infrastructure as code:</b> <code>render.yaml</code> (a Render Blueprint) defines both services; Render redeploys automatically on every push to <code>main</code>.</li>
+  <li><b>Start-up:</b> the API container runs <code>alembic upgrade head</code>, then the idempotent seed, then uvicorn on the port Render assigns.</li>
+  <li><b>Database:</b> Neon runs PostgreSQL 18; the local stack runs 16. The full test suite was run against both versions with the same result (120 passed).</li>
+  <li><b>Free-tier behaviour:</b> the API sleeps after 15 minutes without traffic; the first request then takes about 30–60 s. Render’s disk is ephemeral, which is why product photos were moved from a file volume into PostgreSQL (migration 0002).</li>
+</ul>
+<h3>7.2 Local – Docker Compose</h3>
+<figure>
+  <img src="diagrams/png/08-deployment-local.png" style="width:40%">
+  <figcaption><b>Figure 7:</b> Local installation <span class="notation">UML 2.5 deployment diagram</span></figcaption>
+</figure>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="chap">
+<h2><span class="no">8</span>Data model</h2>
+<p>Figure 8 shows the persistent domain model as implemented by Alembic migrations 0001 and 0002. Each class is one table; constraints in braces are enforced by the database itself, not only by application code.</p>
+<figure>
+  <img src="diagrams/png/05-domain-classes.png" style="width:72%">
+  <figcaption><b>Figure 8:</b> Persistent domain model <span class="notation">UML 2.5 class diagram</span></figcaption>
+</figure>
+<table>
+  <thead><tr><th style="width:26%">Invariant</th><th>How it is guaranteed</th><th style="width:15%">Requirement</th></tr></thead>
+  <tbody>
+    <tr><td>Stock never negative</td><td>Row lock + check in the billing service; <code>CHECK (stock &gt;= 0)</code> in the database.</td><td>NFR-04</td></tr>
+    <tr><td>Ledger is the truth</td><td>Stock changes only by inserting a StockMove; moves are never updated or deleted; <code>products.stock</code> is a mirror updated in the same transaction; a test reconciles the sum of moves with stock.</td><td>NFR-06</td></tr>
+    <tr><td>Receipts never change</td><td><code>bill_lines.unit_price</code> is copied at sale; products are archived, never deleted.</td><td>FR-14/25</td></tr>
+    <tr><td>Unique, gap-free bill numbers</td><td>PostgreSQL sequence <code>bill_no_seq</code> (starting at 1042), taken only after every check has passed; unique index.</td><td>FR-24</td></tr>
+    <tr><td>Exact money</td><td><code>NUMERIC(10,2)</code> columns, Python <code>Decimal</code>, GST rounded half-up.</td><td>TR-04</td></tr>
+    <tr><td>Audit trail</td><td>Bills reference the cashier; every move references the acting user, the bill (for sales) and a timestamp.</td><td>NFR-18</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 9 ============ -->
+<section style="margin-top:16pt">
+<h2><span class="no">9</span>Cross-cutting concepts</h2>
+<table>
+  <thead><tr><th style="width:19%">Concept</th><th>Implementation</th></tr></thead>
+  <tbody>
+    <tr><td>Authentication</td><td>4-digit PIN verified against a bcrypt hash; there is no plaintext PIN column. Signed HS256 JWT, 8 h lifetime; the secret is generated by the host and never committed.</td></tr>
+    <tr><td>Authorisation</td><td>FastAPI dependencies <code>get_current_user</code> / <code>require_manager</code> on every protected route; the user and role are reloaded from the database per request. Missing or invalid token → 401, wrong role → 403.</td></tr>
+    <tr><td>Public endpoints</td><td>Deliberately public: <code>POST /api/auth/login</code>, <code>GET /api/users/pin-targets</code> (names and roles of active staff for the login screen — never PINs), <code>GET /api/health</code> (host health check) and <code>GET /media/products/{name}</code> (photos, because an <code>&lt;img&gt;</code> tag cannot send a bearer token; names are random 128-bit UUIDs). All other routes require a token — 27 automated RBAC tests check this.</td></tr>
+    <tr><td>Input validation</td><td>Every body and query goes through a Pydantic model (NFR-10): positive quantities, 4-digit PINs, cash must carry a tendered amount, UPI must not.</td></tr>
+    <tr><td>File uploads</td><td>Content type and filename are ignored; the bytes must decode as PNG, JPEG or WebP; the image is re-encoded from pixels (removing EXIF and polyglot payloads), scaled to 900 px and stored under a generated UUID. SVG is refused.</td></tr>
+    <tr><td>Error handling</td><td>Services raise domain errors (<code>NotFoundError</code>, <code>ValidationError</code>, <code>ConflictError</code>, <code>InsufficientStockError</code>); one handler maps them to HTTP codes with sentences such as “Insufficient stock: only 3 left” (NFR-13).</td></tr>
+    <tr><td>Money</td><td>All arithmetic in <code>services/money.py</code> with <code>Decimal</code> and <code>ROUND_HALF_UP</code>; a release-gate test asserts that no float ever reaches a money column.</td></tr>
+    <tr><td>Configuration</td><td>Twelve-factor style: database URL, JWT secret and lifetime, UPI ID, GST rate and seeding all come from environment variables (<code>.env.example</code>, <code>render.yaml</code>).</td></tr>
+    <tr><td>Schema evolution</td><td>Alembic migrations only; the app never creates tables itself (NFR-17). Migrations run automatically on container start.</td></tr>
+    <tr><td>Test data</td><td>An idempotent seed creates a realistic café: 12 menu items in 4 categories with prices and stock, and 3 staff accounts — no dummy text.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 10 ============ -->
+<section style="margin-top:16pt">
+<h2><span class="no">10</span>Architecture decision records</h2>
+<p>The technology choices are covered in Section 4. The following design decisions within that stack each had a realistic alternative; they are recorded in short ADR form (context → decision → consequence).</p>
+<table>
+  <thead><tr><th style="width:7%">ADR</th><th style="width:22%">Decision</th><th style="width:26%">Alternative rejected</th><th>Rationale and consequence</th></tr></thead>
+  <tbody>
+    <tr><td>01</td><td>Pessimistic row locks during the sale</td><td>Optimistic locking with a version column</td><td>Optimistic locking would make a busy counter retry sales at checkout; a short lock is invisible to the user. Consequence: sales of the same item are serialised (milliseconds).</td></tr>
+    <tr><td>02</td><td>Lock rows in ascending product id order</td><td>Lock in basket order</td><td>Two baskets with overlapping items in opposite order could deadlock. Fixed ordering removes the possibility.</td></tr>
+    <tr><td>03</td><td>Append-only ledger + cached stock column</td><td>Compute stock as <code>SUM(delta)</code> on every read</td><td>Full audit trail and a fast menu query; the cost is keeping the mirror in step, which is done in the same transaction and reconciled by a test.</td></tr>
+    <tr><td>04</td><td>Validate everything, then take the bill number</td><td>Take the number first</td><td>Sequences ignore rollback, so taking the number first leaves gaps in an audited series. Phase 3 fix extended this to short cash.</td></tr>
+    <tr><td>05</td><td>Decimal end to end</td><td>Float maths, round for display</td><td>₹0.05 cannot be represented exactly in binary floating point; rounding errors would accumulate across a day.</td></tr>
+    <tr><td>06</td><td>Copy unit price onto each bill line</td><td>Join bill lines to the current price</td><td>Receipts are historical records; a price change must not rewrite them (FR-25).</td></tr>
+    <tr><td>07</td><td>Archive products, never delete</td><td>Hard delete with cascade</td><td>Old bills keep their items; the menu stays clean (FR-14).</td></tr>
+    <tr><td>08</td><td>Re-read role from DB per request</td><td>Trust the token’s role claim</td><td>Deactivation is immediate. Cost: one indexed query per request.</td></tr>
+    <tr><td>09</td><td>Domain errors in services, HTTP mapping in one place</td><td>Raise <code>HTTPException</code> in services</td><td>Services stay independent of the web framework and testable directly; messages are consistent.</td></tr>
+    <tr><td>10</td><td>Store photos in PostgreSQL (Phase 3)</td><td>File volume; object storage (S3, Vercel Blob)</td><td>The free cloud host wipes its disk on restart; object storage would add a third service and credentials. A photo now commits in the same transaction as the product’s <code>photo_url</code>. Cost: about 50–150 KB per photo in the database, acceptable for a menu of tens of items.</td></tr>
+    <tr><td>11</td><td>Tests on a real PostgreSQL</td><td>SQLite in memory</td><td>Only a real database proves the locks and the CHECK constraint. Cost: the suite needs Docker and takes about 110 s.</td></tr>
+    <tr><td>12</td><td>Diagrams as PlantUML source in the repository (Phase 3)</td><td>Drawings in a slide tool</td><td>Diagrams are versioned and reviewed with the code, use standard UML notation, and can be regenerated for each release.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="chap">
+<h2><span class="no">11</span>Quality and testing</h2>
+<p>Each work package was tested as soon as it was complete. The automated suite runs against a migrated PostgreSQL database; the six tests marked <code>gate</code> are release gates — a release is not tagged unless they pass.</p>
+<table>
+  <thead><tr><th style="width:26%">Test module</th><th class="c" style="width:8%">Tests</th><th>Covers</th></tr></thead>
+  <tbody>
+    <tr><td>test_auth.py</td><td class="c">13</td><td>PIN login, JWT issue / expiry / tampering, logout (FR-01…08)</td></tr>
+    <tr><td>test_rbac.py</td><td class="c">27</td><td>401 without token and 403 for cashiers on every protected route (FR-04/06, NFR-07/11)</td></tr>
+    <tr><td>test_staff.py</td><td class="c">11</td><td>Add staff, reset PIN, deactivate, last-manager guard (FR-09…11)</td></tr>
+    <tr><td>test_inventory.py</td><td class="c">14</td><td>Product CRUD, archive, receive/remove, ledger reconciliation, low stock (FR-12…18, NFR-06)</td></tr>
+    <tr><td>test_billing.py</td><td class="c">13</td><td>Totals (TC-02), stock deduction (TC-05), price-at-sale (TC-08), sequential bill numbers (TC-06)</td></tr>
+    <tr><td><b>test_billing_gates.py</b></td><td class="c"><b>6</b></td><td><b>Release gates:</b> two and ten concurrent bills for the same item, mid-transaction failure, whole-basket rollback, no bill number consumed by a rejected sale, no float in money (NFR-04/05)</td></tr>
+    <tr><td>test_payments.py</td><td class="c">9</td><td>Cash change (TC-04), short cash rejected without a gap, UPI and QR (TC-07) (FR-26…28)</td></tr>
+    <tr><td>test_orders.py</td><td class="c">11</td><td>History by date and number, receipts, daily totals (FR-29/30)</td></tr>
+    <tr><td>test_photos.py</td><td class="c">16</td><td>Upload, serving, replacement, deletion, and rejection of scripts, SVG, oversized and empty files</td></tr>
+    <tr><td><b>Total</b></td><td class="c"><b>120</b></td><td>All passed on 28 Oct 2026 (PostgreSQL 16, ≈ 112 s; also PostgreSQL 18). Gates: 6 passed in 3.9 s. Front end: <code>tsc</code> strict with 0 errors.</td></tr>
+  </tbody>
+</table>
+<h3>Live verification on the cloud instance (28 Oct 2026)</h3>
+<p>After deployment, a scripted smoke test ran against <code>https://tulsi-web.onrender.com</code>: no token → 401; wrong PIN → 401; cashier on a manager route → 403; menu with 12 items; cash sale 2 × Filter Coffee with ₹500 tendered → bill 1042, ₹80.00 + ₹4.00 GST = ₹84.00, change ₹416.00; UPI sale → bill 1043; an oversized order → 409 “Insufficient stock: only 57 left” with nothing written; photo upload, serve and delete; daily total ₹126.00 from 2 bills.</p>
+</section>
+
+<!-- ============ 12 ============ -->
+<section style="margin-top:16pt">
+<h2><span class="no">12</span>Risks and technical debt</h2>
+<p>The IU brief requires non-functional requirements that could not be met within the project to be listed as technical debt. They are recorded here honestly, with their impact and the planned remedy.</p>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:27%">Technical debt</th><th style="width:12%">Affects</th><th>Impact and remedy</th></tr></thead>
+  <tbody>
+    <tr><td>TD-01</td><td>No automated load test</td><td>NFR-01, 02, 03</td><td>The 2 s / 1,000-product, 1 s confirmation and 10-till targets are designed for (indexed queries, short locks) but not measured. Remedy: a Locust script with a 1,000-product seed.</td></tr>
+    <tr><td>TD-02</td><td>No front-end unit tests</td><td>Maintainability</td><td>UI logic is covered by strict typing and manual test cases TC-01…08 only. Remedy: Vitest + React Testing Library for the basket and payment modal.</td></tr>
+    <tr><td>TD-03</td><td>No lock-out after repeated wrong PINs</td><td>NFR-09 spirit</td><td>A 4-digit PIN has only 10,000 values; bcrypt slows guessing but does not stop it. Remedy: rate limit or temporary lock after 5 failures.</td></tr>
+    <tr><td>TD-04</td><td>UPI payment confirmed manually</td><td>FR-28 (by design)</td><td>The cashier must check the customer’s phone. Remedy (future, FR-F1): gateway with webhook confirmation.</td></tr>
+    <tr><td>TD-05</td><td>Free-tier cold start</td><td>NFR-02 on first request</td><td>The first request after 15 idle minutes takes 30–60 s. Remedy: a paid always-on instance for real café use.</td></tr>
+    <tr><td>TD-06</td><td>Token revocation only via deactivation</td><td>NFR-08</td><td>Logout removes the token in the browser; a stolen token stays valid until expiry unless the user is deactivated. Remedy: a short-lived token with a refresh token, or a deny list.</td></tr>
+    <tr><td>TD-07</td><td>Staff names visible on the login screen</td><td>Privacy</td><td>Accepted trade-off for tap-to-select login on a shared till. Remedy if needed: a device-pairing code before the name list is shown.</td></tr>
+    <tr><td>TD-08</td><td>PostgreSQL version differs between local (16) and cloud (18)</td><td>NFR-14</td><td>The suite passes on both; a future breaking change could appear on only one. Remedy: pin both to the same major version.</td></tr>
+  </tbody>
+</table>
+<h3>Remaining risks</h3>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th>Risk (Phase 1 register)</th><th style="width:40%">Status at v1.0.0</th></tr></thead>
+  <tbody>
+    <tr><td>TR-01</td><td>Race condition sells the same dish twice</td><td><b>Closed</b> — row locks, CHECK, two concurrency gates.</td></tr>
+    <tr><td>TR-02</td><td>Partial writes from unfamiliar transaction semantics</td><td><b>Closed</b> — single transaction, fault-injection gate.</td></tr>
+    <tr><td>TR-03</td><td>Prototype does not translate into React</td><td><b>Closed</b> — five screens rebuilt as components.</td></tr>
+    <tr><td>TR-04</td><td>₹ / GST rounding errors</td><td><b>Closed</b> — Decimal, TC-02 asserted to the paisa.</td></tr>
+    <tr><td>TR-05</td><td>Environment differs on another machine</td><td><b>Mitigated</b> — same images locally and in the cloud; TD-08 remains.</td></tr>
+    <tr><td>BR-03</td><td>Solo timeline slips</td><td><b>Occurred</b> — planned end 25 Sep 2026, actual end of October; see lessons learned in the abstract.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ A ============ -->
+<section class="chap">
+<h2><span class="no">A</span>Appendix: REST API contract</h2>
+<p>24 routes. The complete, generated OpenAPI description is served by the running API at <code>/docs</code>. Role: <i>public</i> = no token; <i>any</i> = Cashier or Manager; <i>manager</i> = Manager only.</p>
+<table>
+  <thead><tr><th style="width:9%">Method</th><th style="width:33%">Path</th><th style="width:10%">Role</th><th>Purpose</th><th style="width:12%">Req.</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td>/api/auth/login</td><td>public</td><td>PIN login → JWT</td><td>FR-01/02</td></tr>
+    <tr><td>GET</td><td>/api/users/pin-targets</td><td>public</td><td>Active staff names for the login screen</td><td>FR-01</td></tr>
+    <tr><td>GET</td><td>/api/auth/me</td><td>any</td><td>Current user</td><td>FR-03</td></tr>
+    <tr><td>POST</td><td>/api/auth/logout</td><td>any</td><td>End session</td><td>FR-08</td></tr>
+    <tr><td>GET · POST</td><td>/api/users</td><td>manager</td><td>List / add staff</td><td>FR-09</td></tr>
+    <tr><td>PATCH</td><td>/api/users/{id}</td><td>manager</td><td>Edit staff, reset PIN</td><td>FR-10</td></tr>
+    <tr><td>PATCH</td><td>/api/users/{id}/deactivate</td><td>manager</td><td>Deactivate staff</td><td>FR-11</td></tr>
+    <tr><td>GET</td><td>/api/products</td><td>any</td><td>Products, search and category filter</td><td>FR-16</td></tr>
+    <tr><td>POST</td><td>/api/products</td><td>manager</td><td>Create product with opening stock</td><td>FR-12</td></tr>
+    <tr><td>PATCH</td><td>/api/products/{id}</td><td>manager</td><td>Edit product</td><td>FR-13</td></tr>
+    <tr><td>PATCH</td><td>/api/products/{id}/archive</td><td>manager</td><td>Archive / restore</td><td>FR-14</td></tr>
+    <tr><td>POST · DELETE</td><td>/api/products/{id}/photo</td><td>manager</td><td>Upload / remove photo</td><td>FR-13</td></tr>
+    <tr><td>POST</td><td>/api/products/{id}/stock</td><td>manager</td><td>Receive / remove stock (ledger)</td><td>FR-15</td></tr>
+    <tr><td>GET</td><td>/api/products/stock-moves</td><td>manager</td><td>Stock ledger</td><td>NFR-06/18</td></tr>
+    <tr><td>GET</td><td>/api/register/menu</td><td>any</td><td>Active products by category with stock badges</td><td>FR-17/19</td></tr>
+    <tr><td>GET</td><td>/api/register/upi-qr</td><td>any</td><td>Static UPI QR for an amount</td><td>FR-28</td></tr>
+    <tr><td>POST</td><td>/api/bills</td><td>any</td><td>The atomic sale → 201 receipt / 409 / 400</td><td>FR-22…27</td></tr>
+    <tr><td>GET</td><td>/api/bills</td><td>any</td><td>History by date or bill number</td><td>FR-29</td></tr>
+    <tr><td>GET</td><td>/api/bills/{bill_no}</td><td>any</td><td>Receipt</td><td>FR-29</td></tr>
+    <tr><td>GET</td><td>/api/reports/daily-total</td><td>manager</td><td>Daily sales total</td><td>FR-30</td></tr>
+    <tr><td>GET</td><td>/media/products/{name}</td><td>public</td><td>Product photo</td><td>FR-13</td></tr>
+    <tr><td>GET</td><td>/api/health</td><td>public</td><td>Health check for the host</td><td>NFR-14</td></tr>
+  </tbody>
+</table>
+<h3>References</h3>
+<p style="font-size:8.8pt;text-align:left">Starke, G., &amp; Hruschka, P. (n.d.). <i>arc42 – Template for documentation of software and system architecture</i>. https://arc42.org/ · Object Management Group. (2017). <i>Unified Modeling Language (UML), Version 2.5.1</i>. https://www.omg.org/spec/UML/2.5.1 · PlantUML. (n.d.). https://plantuml.com/ · PostgreSQL Global Development Group. (n.d.). <i>Explicit locking</i>. https://www.postgresql.org/docs/16/explicit-locking.html · Render. (n.d.). <i>Blueprint specification</i>. https://render.com/docs/blueprint-spec · Neon. (n.d.). https://neon.tech/docs · Royce, W. W. (1970). Managing the development of large software systems. <i>Proceedings of IEEE WESCON</i>, 1–9. Further library references as in the Phase 2 presentation.</p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+@startuml
+!include _style.iuml
+title UML 2.5 Class Diagram – Persistent domain model (Alembic 0001 + 0002)
+hide empty methods
+
+enum UserRole {
+  MANAGER
+  CASHIER
+}
+enum StockMoveReason {
+  OPENING
+  RECEIVE
+  REMOVE
+  SALE
+}
+enum PaymentMethod {
+  CASH
+  UPI
+}
+
+class User {
+  id : int {PK}
+  name : str {unique}
+  role : UserRole
+  pin_hash : str {bcrypt hash}
+  is_active : bool
+  created_at : datetime
+}
+class Product {
+  id : int {PK}
+  name : str
+  category : str
+  {field} price : Decimal(10,2)
+  stock : int {stock >= 0}
+  reorder_level : int
+  photo_url : str [0..1]
+  is_archived : bool
+}
+class ProductPhoto {
+  id : str {PK, uuid hex}
+  content_type : str
+  data : bytes
+}
+class Bill {
+  id : int {PK}
+  bill_no : int {unique, gap-free}
+  {field} subtotal : Decimal(10,2)
+  {field} gst : Decimal(10,2)
+  {field} total : Decimal(10,2)
+  created_at : datetime
+}
+class BillLine {
+  qty : int {qty > 0}
+  {field} unit_price : Decimal(10,2) {copied at sale}
+  {field} line_total : Decimal(10,2)
+}
+class Payment {
+  method : PaymentMethod
+  tendered : Decimal [0..1]
+  change_due : Decimal [0..1]
+}
+class StockMove <<append-only>> {
+  id : int {PK}
+  delta : int
+  reason : StockMoveReason
+  created_at : datetime
+}
+
+User "1" -- "0..*" Bill : rings up >
+Bill "1" *-- "1..*" BillLine : lines
+BillLine "0..*" --> "1" Product : sold as >
+Bill "1" *-- "1" Payment : paid by
+Product "1" *-- "0..*" ProductPhoto : photos
+Product "1" -- "0..*" StockMove : changes <
+User "1" -- "0..*" StockMove : performed by <
+Bill "0..1" -- "0..*" StockMove : causes >
+
+User ..> UserRole
+StockMove ..> StockMoveReason
+Payment ..> PaymentMethod
+
+note bottom of StockMove
+  Source of truth for stock (NFR-06): rows are only
+  inserted, never updated or deleted. Product.stock
+  is a cached sum updated in the same transaction.
+end note
+note top of BillLine
+  unit_price is a copy, so later price
+  edits never change old receipts (FR-25).
+end note
+
+legend right
+  |= Notation |= Meaning |
+  | class box | entity (one database table) |
+  | ◆—— (filled diamond) | composition: part cannot exist\nwithout the whole |
+  | —— with "1", "0..*" | association with multiplicities |
+  | ——> | navigable association |
+  | {…} | constraint enforced in the DB |
+  | <<enumeration>> | fixed set of values |
+endlegend
+@enduml
