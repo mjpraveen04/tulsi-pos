@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tulsi Tiffins POS – Project Management Report v1.0.0</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  @page :first { margin: 0; }
+  :root {
+    --green: #418d59; --green-dark: #2d6a41; --green-soft: #e7f2ea; --green-line: #b9d8c3;
+    --saffron: #d98a1f; --saffron-soft: #fcefdc; --ink: #1f2421; --muted: #5d645f;
+    --rule: #d9ddd9; --paper: #faf9f5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+         font-size: 10.2pt; line-height: 1.5; }
+  p { margin: 0 0 7pt; text-align: justify; hyphens: auto; }
+  h1 { font-size: 19pt; margin: 0 0 4pt; color: var(--green-dark); letter-spacing: -0.2px; }
+  h2 { font-size: 14pt; color: var(--green-dark); margin: 0 0 8pt; padding-bottom: 4pt;
+       border-bottom: 2px solid var(--green); break-after: avoid; }
+  h2 .no { color: var(--saffron); margin-right: 6pt; }
+  h3 { font-size: 11.2pt; margin: 12pt 0 5pt; break-after: avoid; }
+  section.chap { break-before: page; }
+  ul { margin: 0 0 7pt; padding-left: 15pt; } li { margin-bottom: 2.5pt; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.6pt; background: var(--paper);
+         padding: 0 2px; border-radius: 2px; }
+  b { font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 9pt; font-size: 8.7pt; line-height: 1.35;
+          break-inside: auto; }
+  th { background: var(--green); color: #fff; text-align: left; font-weight: 600; padding: 4pt 6pt; vertical-align: bottom; }
+  td { padding: 3.5pt 6pt; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr { break-inside: avoid; }
+  tbody tr:nth-child(even) td { background: var(--paper); }
+  td.c, th.c { text-align: center; }
+  .tcap { font-size: 8.6pt; color: var(--muted); margin: 2pt 0 2pt; font-weight: 600; }
+  figure { margin: 6pt 0 12pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--rule); border-radius: 6px; padding: 6pt; background: #fff; }
+  figcaption { font-size: 8.6pt; color: var(--muted); margin-top: 4pt; text-align: center; }
+  figcaption b { color: var(--ink); }
+  .notation { display: inline-block; font-size: 7.8pt; font-weight: 600; color: var(--green-dark);
+              background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 99px;
+              padding: 0 7px; margin-left: 4px; }
+  .box { border: 1px solid var(--rule); border-left: 4px solid var(--green); background: var(--paper);
+         border-radius: 0 6px 6px 0; padding: 7pt 10pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  .box.warn { border-left-color: var(--saffron); background: #fffaf2; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .k { font-size: 8pt; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); }
+  .y { color: var(--green-dark); font-weight: 700; }
+  .p { color: #9a5a00; font-weight: 700; }
+  .n { color: #a33; font-weight: 700; }
+  .chosen td { background: var(--green-soft) !important; }
+  .chosen td:first-child { font-weight: 700; }
+  /* cover */
+  .cover { width: 210mm; height: 296mm; position: relative; break-after: page; overflow: hidden; }
+  .cover .band { position: absolute; right: 0; top: 0; width: 68mm; height: 100%; background: var(--green); }
+  .cover .logo { position: absolute; right: 13mm; top: 58mm; }
+  .cover .meta { position: absolute; left: 22mm; bottom: 24mm; width: 112mm; font-size: 9.2pt; }
+  .cover .meta td { border: 0; padding: 2pt 0; background: none !important; }
+  .cover .meta td:first-child { color: var(--muted); width: 34mm; }
+  .toc { columns: 1; font-size: 10pt; }
+  .toc div { display: flex; border-bottom: 1px dotted var(--rule); padding: 3pt 0; }
+  .toc div span:first-child { width: 10mm; color: var(--saffron); font-weight: 700; }
+
+  .pill { display: inline-block; font-size: 7.6pt; font-weight: 600; border-radius: 99px; padding: 0 6px; white-space: nowrap; border: 1px solid; }
+  .pill.ok { color: var(--green-dark); background: var(--green-soft); border-color: var(--green-line); }
+  .pill.part { color: #8a5200; background: var(--saffron-soft); border-color: #efc98f; }
+  .pill.no { color: #8f2c2c; background: #fbeaea; border-color: #e7b9b9; }
+  section.chap table { table-layout: fixed; }
+  th code { background: transparent; color: #fff; }
+  td code, td { overflow-wrap: break-word; }
+  section.chap { break-before: auto; margin-top: 16pt; }
+  section.chap:first-of-type { break-before: page; margin-top: 0; }
+  .gantt { font-size: 7.8pt; text-align: left; border: 1px solid var(--rule); border-radius: 6px; padding: 8pt 10pt 4pt; }
+  .g-head, .g-row { display: flex; align-items: center; }
+  .g-head > span, .g-row > span { width: 44mm; flex: none; padding-right: 6pt; }
+  .g-scale, .g-track { position: relative; flex: 1; }
+  .g-scale { height: 12pt; border-bottom: 1px solid var(--rule); color: var(--muted); }
+  .g-scale span { position: absolute; top: 0; }
+  .g-track { height: 13pt; background: repeating-linear-gradient(90deg, transparent 0 calc(33.7% - 1px), var(--rule) calc(33.7% - 1px) 33.7%); }
+  .g-row { border-bottom: 1px dotted #eceeec; }
+  .g-track i { position: absolute; top: 3pt; height: 7pt; border-radius: 2px; }
+  i.plan { background: var(--green-soft); border: 1px solid var(--green); }
+  i.act { background: var(--saffron); }
+  .g-ms .g-track b { position: absolute; top: 0; transform: translateX(-50%); color: var(--green-dark); font-size: 10pt; line-height: 13pt; }
+  .g-lbl .g-track { height: 11pt; background: none; }
+  .g-lbl em { position: absolute; font-style: normal; color: var(--muted); white-space: nowrap; }
+  .g-legend { display: flex; gap: 14pt; justify-content: center; font-size: 8pt; color: var(--muted); margin-top: 5pt; }
+  .g-legend i { display: inline-block; width: 16pt; height: 7pt; border-radius: 2px; vertical-align: -0.5pt; margin-right: 3pt; }
+  .g-legend b { color: var(--green-dark); }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="band"></div>
+  <svg class="logo" width="150" height="150" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="17" fill="#fff"/>
+    <text x="32" y="27.5" text-anchor="middle" dominant-baseline="central" font-family="'Devanagari Sangam MN','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif" font-size="44" font-weight="700" fill="#418d59">तु</text>
+  </svg>
+  <div style="position:absolute;left:22mm;top:48mm;width:112mm">
+    <div class="k">IU · Project: Software Engineering (CSEMCSPSE01) · Portfolio Part 3</div>
+    <div style="font-size:30pt;font-weight:600;line-height:1.1;margin-top:14mm;letter-spacing:-0.6px">Tulsi Tiffins POS</div>
+    <div style="font-size:15pt;color:var(--muted);margin-top:4mm;line-height:1.3">Project Management Report</div>
+    <div style="width:22mm;height:3px;background:var(--saffron);margin:10mm 0 8mm"></div>
+    <div style="font-size:11pt;line-height:1.55">Plan against actual, milestones and releases, scope, risk, quality and configuration management, and the index of all submitted documents.</div>
+  </div>
+  <table class="meta">
+    <tr><td>Author</td><td><b>Praveen Mysore Jagannath</b> · 10251728</td></tr>
+    <tr><td>Tutor</td><td>Niknejad, Naghmeh</td></tr>
+    <tr><td>Document version</td><td><b>1.0.0</b> (matches software release v1.0.0)</td></tr>
+    <tr><td>Date</td><td>28 October 2026</td></tr>
+    <tr><td>Project plan</td><td>Phase 1 report v0.1.0, Section 5 (Table 7, Gantt chart)</td></tr>
+    <tr><td>Source code</td><td>github.com/mjpraveen04/tulsi-pos</td></tr>
+  </table>
+</div>
+
+<!-- ============ TOC ============ -->
+<h1>Contents</h1>
+<div class="toc" style="margin:8pt 0 16pt">
+  <div><span>1</span>Project profile in brief</div>
+  <div><span>2</span>Schedule – plan against actual</div>
+  <div><span>3</span>Milestones and releases</div>
+  <div><span>4</span>Scope management</div>
+  <div><span>5</span>Risk management</div>
+  <div><span>6</span>Quality management</div>
+  <div><span>7</span>Configuration and release management</div>
+  <div><span>8</span>Resources and budget</div>
+  <div><span>9</span>Index of submitted documents</div>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="chap">
+<h2><span class="no">1</span>Project profile in brief</h2>
+<p>The full project profile – background, objective, scope, target users, organisation and risks – is the Phase 1 report (<code>MysoreJagannath-Praveen_10251728_PSE_P1_S.pdf</code>, in this folder). This report records how the project was actually run against that profile.</p>
+<table>
+  <thead><tr><th style="width:26%">Item</th><th>Phase 1 baseline</th></tr></thead>
+  <tbody>
+    <tr><td>Objective</td><td>One affordable, touch-friendly web application that unifies register, inventory, orders, staff and payments for a small café, so that every sale updates stock correctly and is recorded with a full audit trail.</td></tr>
+    <tr><td>Scope (MVP)</td><td>PIN login with two roles; staff management; products and an append-only stock ledger; a Register that cannot oversell; atomic billing; cash and UPI (static QR); searchable order history.</td></tr>
+    <tr><td>Out of scope</td><td>UPI gateway with webhooks, supplier purchase orders, analytics dashboards, table and reservation management (FR-F1…F4).</td></tr>
+    <tr><td>Methodology</td><td>Waterfall: conception, design, implementation, testing, deployment; requirements frozen with MoSCoW before coding.</td></tr>
+    <tr><td>Organisation</td><td>Single developer in all roles – project lead, requirements analyst, developer, tester, technical writer; tutor review at the end of each phase.</td></tr>
+    <tr><td>Planned end</td><td>25 September 2026</td></tr>
+    <tr><td>Budget</td><td>No funding: free and open-source tools, free hosting tiers.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="chap">
+<h2><span class="no">2</span>Schedule – plan against actual</h2>
+<p>The plan had nine work packages from 4 August to 25 September 2026. The implementation and test work packages WP1–WP8 were finished early, by 13 August, for the Phase 2 submission. Deployment and final documentation (WP9) were planned for 20–25 September but were done on 26–28 October, after a break of about two months with no development. The release therefore came <b>33 days after the planned end</b>.</p>
+
+<figure>
+<div class="gantt">
+  <div class="g-head"><span></span><div class="g-scale">
+    <span style="left:0%">1 Aug</span><span style="left:33.7%">1 Sep</span><span style="left:66.3%">1 Oct</span><span style="left:94%">1 Nov</span>
+  </div></div>
+  <!-- timeline: 1 Aug (0%) to 1 Nov (100%), 92 days; 1 day = 1.087% -->
+  <div class="g-row"><span>WP1 Setup &amp; environment</span><div class="g-track"><i class="plan" style="left:3.3%;width:5.4%"></i></div></div>
+  <div class="g-row"><span>WP2 Authentication &amp; roles</span><div class="g-track"><i class="plan" style="left:8.7%;width:10.9%"></i></div></div>
+  <div class="g-row"><span>WP3 Staff management</span><div class="g-track"><i class="plan" style="left:16.3%;width:7.6%"></i></div></div>
+  <div class="g-row"><span>WP4 Product &amp; inventory</span><div class="g-track"><i class="plan" style="left:19.6%;width:15.2%"></i></div></div>
+  <div class="g-row"><span>WP5 Register / billing</span><div class="g-track"><i class="plan" style="left:29.3%;width:17.4%"></i></div></div>
+  <div class="g-row"><span>WP6 Payments</span><div class="g-track"><i class="plan" style="left:41.3%;width:8.7%"></i></div></div>
+  <div class="g-row"><span>WP7 Orders / history</span><div class="g-track"><i class="plan" style="left:46.7%;width:6.5%"></i></div></div>
+  <div class="g-row"><span>WP8 Testing &amp; hardening</span><div class="g-track"><i class="plan" style="left:48.9%;width:9.8%"></i></div></div>
+  <div class="g-row"><span>WP9 Deployment &amp; docs</span><div class="g-track"><i class="plan" style="left:54.3%;width:6.5%"></i><i class="act" style="left:93.5%;width:3.3%"></i></div></div>
+  <div class="g-row"><span><b>WP1–WP8 actual</b></span><div class="g-track"><i class="act" style="left:3.3%;width:10.9%"></i></div></div>
+  <div class="g-row g-ms"><span>Milestones</span><div class="g-track">
+    <b style="left:2.2%">◆</b><b style="left:13.0%">◆</b><b style="left:59.8%;color:#a33">◇</b><b style="left:95.7%">◆</b>
+  </div></div>
+  <div class="g-row g-lbl"><span></span><div class="g-track">
+    <em style="left:0%">v0.1.0</em><em style="left:10.5%">v0.2.0</em><em style="left:52%">planned end · 25 Sep</em><em style="left:84%">v1.0.0 · 28 Oct</em>
+  </div></div>
+</div>
+<div class="g-legend">
+  <span><i class="plan"></i> planned (Phase 1, Table 7)</span>
+  <span><i class="act"></i> actual</span>
+  <span><b>◆</b> milestone reached</span>
+  <span><b style="color:#a33">◇</b> planned milestone, missed</span>
+</div>
+<figcaption><b>Figure 1:</b> Work packages, planned against actual, August – October 2026 <span class="notation">Gantt chart · legend above</span></figcaption>
+</figure>
+
+<table>
+  <thead><tr><th style="width:24%">Work package</th><th style="width:15%">Planned</th><th style="width:16%">Actual</th><th>Result and deviation</th></tr></thead>
+  <tbody>
+    <tr><td>WP1 Setup &amp; environment</td><td>04 – 08 Aug</td><td rowspan="8">4 – 13 Aug (not tracked per package)</td><td>Docker Compose, Alembic, project skeleton.</td></tr>
+    <tr><td>WP2 Authentication &amp; roles</td><td>09 – 18 Aug</td><td>PIN login, JWT, server-side roles.</td></tr>
+    <tr><td>WP3 Staff management</td><td>16 – 22 Aug</td><td>Add, reset PIN, deactivate; last-manager guard added.</td></tr>
+    <tr><td>WP4 Product &amp; inventory</td><td>19 Aug – 01 Sep</td><td>Products, stock ledger, low-stock badges; photo upload added.</td></tr>
+    <tr><td>WP5 Register / billing</td><td>28 Aug – 12 Sep</td><td>Atomic sale with row locks; bill number after the stock check.</td></tr>
+    <tr><td>WP6 Payments</td><td>08 – 15 Sep</td><td>Cash with change, static UPI QR.</td></tr>
+    <tr><td>WP7 Orders / history</td><td>13 – 18 Sep</td><td>Bill history, receipt view, daily total.</td></tr>
+    <tr><td>WP8 Testing &amp; hardening</td><td>15 – 23 Sep</td><td>118 tests incl. 6 release gates; each module tested when finished. <b>About 6 weeks ahead of plan.</b></td></tr>
+    <tr><td>WP9 Deployment &amp; documentation</td><td>20 – 25 Sep</td><td>26 – 28 Oct</td><td>Strict TypeScript, GitHub, Render + Neon deployment, photos in PostgreSQL, bill-number fix, UML documentation, manuals. <b>33 days late.</b></td></tr>
+  </tbody>
+</table>
+<div class="box warn"><p><b>Why the actual dates of WP1–WP8 are not known in detail:</b> version control was set up only after the implementation – the first commit is from 23 August. Dates per work package were therefore not recorded and are not reconstructed here. Committing from the first day is the first lesson in Section 7.</p></div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="chap">
+<h2><span class="no">3</span>Milestones and releases</h2>
+<table>
+  <thead><tr><th style="width:14%">Date</th><th style="width:14%">Version</th><th style="width:26%">Milestone</th><th>Content</th></tr></thead>
+  <tbody>
+    <tr><td>3 Aug 2026</td><td>v0.1.0</td><td>Phase 1 – conception submitted</td><td>Project profile, MoSCoW requirements, use case and domain model, C4 context and container views, Gantt plan, test cases.</td></tr>
+    <tr><td>13 Aug 2026</td><td>v0.2.0</td><td>Phase 2 – development submitted</td><td>All 30 functional requirements implemented, migration 0001, 118 tests on PostgreSQL.</td></tr>
+    <tr><td>23 Aug 2026</td><td>–</td><td>Repository published</td><td>First commit to github.com/mjpraveen04/tulsi-pos; the design hand-off was removed from the public repository.</td></tr>
+    <tr><td>26 Oct 2026</td><td>v0.9.0</td><td>Phase 2 presentation revised</td><td>Front end migrated to strict TypeScript; presentation deck for the tutor review.</td></tr>
+    <tr><td>27 Oct 2026</td><td>–</td><td>Tutor feedback received</td><td>Three points: rationale against alternatives, notation on every diagram, more specific lessons learned.</td></tr>
+    <tr><td><b>28 Oct 2026</b></td><td><b>v1.0.0</b></td><td><b>Phase 3 – final release</b></td><td>Cloud deployment, photos in PostgreSQL (migration 0002), short-cash fix, 120 tests, UML 2.5 architecture documentation, requirements traceability, installation manual. Git tag <code>v1.0.0</code>.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="chap">
+<h2><span class="no">4</span>Scope management</h2>
+<p>The scope was fixed in Phase 1 with MoSCoW. The rule was that a new idea is logged for a later phase, never built mid-project; it was also written into the repository’s build rules (<code>CLAUDE.md</code>, “Scope discipline”).</p>
+<table>
+  <thead><tr><th style="width:30%">Measure</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>Won’t-have items built</td><td><b>0 of 4</b> – no UPI gateway, purchase orders, charts or table management.</td></tr>
+    <tr><td>Requirements dropped</td><td><b>0 of 30</b> functional, 0 of 18 non-functional.</td></tr>
+    <tr><td>Requirements delivered</td><td>29 of 30 functional requirements fully met (FR-16: 2-second target not measured); 14 of 18 non-functional met.</td></tr>
+    <tr><td>Changes during the project</td><td>Nine refinements, all additive – for example short-cash rejection, the last-manager guard and photo storage in the database. Listed with reasons in the Requirements and Traceability Report, Section 7.</td></tr>
+    <tr><td>Work cut when time ran short</td><td>The planned load test (NFR-01…03) – recorded as technical debt TD-01.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="chap">
+<h2><span class="no">5</span>Risk management</h2>
+<p>The risk register from Phase 1 (Tables 3 and 4) was reviewed at the end of the project. The detailed evidence for each risk is in the Requirements and Traceability Report, Section 6.</p>
+<table>
+  <thead><tr><th style="width:8%">ID</th><th style="width:28%">Risk</th><th style="width:13%">Status</th><th>What happened</th></tr></thead>
+  <tbody>
+    <tr><td>TR-01</td><td>Race condition oversells</td><td><span class="pill ok">Closed</span></td><td>Row locks and CHECK; concurrency release gates pass.</td></tr>
+    <tr><td>TR-02</td><td>Partial writes</td><td><span class="pill ok">Closed</span></td><td>One transaction; fault-injection gate passes.</td></tr>
+    <tr><td>TR-03</td><td>Prototype does not translate to React</td><td><span class="pill ok">Closed</span></td><td>Prototype used as visual reference only.</td></tr>
+    <tr><td>TR-04</td><td>Rounding errors</td><td><span class="pill ok">Closed</span></td><td>Decimal throughout the server; browser preview noted as TD-09.</td></tr>
+    <tr><td>TR-05</td><td>Different behaviour on another machine</td><td><span class="pill part">Mitigated</span></td><td>Same images locally and in the cloud; fresh-clone install verified; PostgreSQL 16 vs 18 (TD-08).</td></tr>
+    <tr><td>BR-01</td><td>Scope creep</td><td><span class="pill ok">Closed</span></td><td>MoSCoW freeze held.</td></tr>
+    <tr><td>BR-02</td><td>Owners distrust a self-hosted till</td><td><span class="pill part">Open</span></td><td>Not validated with a real café.</td></tr>
+    <tr><td>BR-03</td><td>Solo timeline stalls</td><td><span class="pill no">Occurred</span></td><td>Two months without development; release 33 days late. Must-haves were front-loaded, so the impact was limited to the load test and the deployment date.</td></tr>
+    <tr><td>BR-04</td><td>A gap is found late</td><td><span class="pill part">Partly occurred</span></td><td>Short cash used up a bill number, and the cloud host would have lost photos; both found and fixed in the final phase.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="chap">
+<h2><span class="no">6</span>Quality management</h2>
+<table>
+  <thead><tr><th style="width:28%">Measure</th><th>How it was applied</th></tr></thead>
+  <tbody>
+    <tr><td>Definition of done per work package</td><td>Endpoints match the API contract including status codes; the package’s tests pass; the concurrency and rollback gates stay green; <code>docker compose up</code> still gives a working application (<code>CLAUDE.md</code>).</td></tr>
+    <tr><td>Automated tests</td><td>120 tests on real PostgreSQL, run before every commit; release gates as a separate marker (<code>-m gate</code>).</td></tr>
+    <tr><td>Test-first bug fixes</td><td>Every defect found was first reproduced by a failing test, e.g. the bill-number gap (1044 instead of 1043).</td></tr>
+    <tr><td>Static checks</td><td>Strict TypeScript; <code>npm run build</code> fails on any type error, including a mismatch with the API types.</td></tr>
+    <tr><td>Reviews</td><td>Code-structure review for the layering rule; schema review for audit columns; tutor review after each phase.</td></tr>
+    <tr><td>Acceptance</td><td>Test cases TC-01…08 automated; live smoke test on the hosted application on 28 Oct 2026; fresh-clone installation test.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="chap">
+<h2><span class="no">7</span>Configuration and release management</h2>
+<ul>
+  <li><b>Repository:</b> one public GitHub repository with code, Docker and cloud configuration, tests and all documentation (<code>docs/</code>). Work is committed directly to <code>main</code> – appropriate for a single developer – and every push to <code>main</code> redeploys the hosted application.</li>
+  <li><b>Versioning:</b> semantic versions. The documents carry the same version as the software; v1.0.0 is marked by the git tag <code>v1.0.0</code> and a GitHub release, which freeze code, diagrams and documents together.</li>
+  <li><b>Database schema:</b> versioned Alembic migrations (0001, 0002); never changed by hand.</li>
+  <li><b>Diagrams as code:</b> PlantUML sources in <code>docs/architecture/diagrams/</code>, rendered to PNG for each release.</li>
+  <li><b>Submission copy:</b> the code zip in <code>04-Implementation</code> is generated from the tag with <code>git archive v1.0.0</code>, so it is identical to the GitHub repository.</li>
+</ul>
+<div class="box warn"><p><b>Lesson:</b> git was introduced only after the implementation, so the versions v0.1.0 and v0.2.0 exist as document versions but not as commits or tags. In a next project the repository would be created on day one and every phase tagged.</p></div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="chap">
+<h2><span class="no">8</span>Resources and budget</h2>
+<table>
+  <thead><tr><th style="width:26%">Resource</th><th style="width:30%">Used</th><th>Cost and limits</th></tr></thead>
+  <tbody>
+    <tr><td>People</td><td>One developer, part-time beside other commitments</td><td>The main constraint of the project (BR-03).</td></tr>
+    <tr><td>Development tools</td><td>Python, FastAPI, PostgreSQL, React, TypeScript, Docker, PlantUML, pytest</td><td>Free and open source.</td></tr>
+    <tr><td>Code hosting</td><td>GitHub (public repository)</td><td>Free.</td></tr>
+    <tr><td>Application hosting</td><td>Render (web service and static site)</td><td>Free plan; API sleeps after 15 minutes, first request 30–60 s (TD-05).</td></tr>
+    <tr><td>Database hosting</td><td>Neon PostgreSQL</td><td>Free plan without expiry; chosen because Render’s free database is deleted after 30 days.</td></tr>
+    <tr><td>Coding assistance</td><td>AI coding assistant, guided by the written build rules in <code>CLAUDE.md</code></td><td>Every generated change was checked by the test suite.</td></tr>
+    <tr><td><b>Total cost</b></td><td colspan="2"><b>€0</b> – the budget constraint was met.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="chap">
+<h2><span class="no">9</span>Index of submitted documents</h2>
+<table>
+  <thead><tr><th style="width:27%">Folder</th><th style="width:44%">File</th><th>Content</th></tr></thead>
+  <tbody>
+    <tr><td rowspan="2">Main folder</td><td>MysoreJagannath-Praveen_10251728_PSE_P3_S.pdf</td><td>2-page abstract (making of, lessons learned)</td></tr>
+    <tr><td>MysoreJagannath-Praveen_10251728_PSE_P3_S.txt</td><td>GitHub link, application link, login data</td></tr>
+    <tr><td rowspan="2">01-Project-management</td><td>MysoreJagannath-Praveen_10251728_PSE_P1_S.pdf</td><td>Result of Phase 1: project profile, plan, requirements, glossary, design</td></tr>
+    <tr><td>Tulsi-Tiffins-POS_Project-Management-Report_v1.0.0.pdf</td><td>This report</td></tr>
+    <tr><td>02-Requirements</td><td>Tulsi-Tiffins-POS_Requirements-and-Traceability_v1.0.0.pdf</td><td>Requirements status, traceability to code and tests, glossary</td></tr>
+    <tr><td rowspan="3">03-Architecture-documentation</td><td>Tulsi-Tiffins-POS_Architecture-Documentation_v1.0.0.pdf</td><td>arc42 architecture, technology decisions, ADRs, technical debt</td></tr>
+    <tr><td>diagrams/ (PlantUML sources and PNG)</td><td>Eight UML 2.5 diagrams</td></tr>
+    <tr><td>Phase 2 result (presentation and summary)</td><td>Result of Phase 2, as submitted and revised after feedback</td></tr>
+    <tr><td rowspan="2">04-Implementation</td><td>MysoreJagannath-Praveen_10251728_PSE_Submission_Code.zip</td><td>All files of the GitHub repository at tag v1.0.0</td></tr>
+    <tr><td>Tulsi-Tiffins-POS_Installation-Manual_v1.0.0.pdf</td><td>Installation and operating manual</td></tr>
+  </tbody>
+</table>
+</section>
+
+</body>
+</html>
