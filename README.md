@@ -61,11 +61,10 @@ a default baked into `docker-compose.yml`, so `docker compose up` works without 
 | `JWT_EXPIRE_HOURS` | `8` | Token lifetime ≈ one shift |
 | `UPI_ID` / `UPI_PAYEE_NAME` | `tulsitiffins@upi` / `Tulsi Tiffins` | Encoded into the static UPI QR |
 | `GST_RATE` | `0.05` | GST applied to every bill |
-| `MEDIA_ROOT` | `/srv/media` in Docker, `backend/media` otherwise | Uploaded product photos |
 | `WEB_PORT` / `API_PORT` / `DB_PORT` | `5173` / `8000` / `5432` | Host port mappings |
 
-Product photos are uploaded at runtime and live on the `tulsi_media` Docker volume, so they
-survive an image rebuild. They are deliberately not committed to the repo.
+Product photos are uploaded at runtime and stored in PostgreSQL (`product_photos`), so they
+survive rebuilds and hosts with a throwaway filesystem. They are deliberately not committed to the repo.
 
 ---
 
@@ -194,5 +193,5 @@ The same Compose stack runs unchanged on a small VM (Lightsail / DigitalOcean / 
 5. Put a TLS-terminating reverse proxy in front of the `web` container for a public URL.
 
 Migrations run automatically on api start (`alembic upgrade head`); the schema is never
-auto-created. Seeding is idempotent and controlled by `SEED_ON_START`. Database data and
-uploaded photos persist on the `tulsi_db_data` and `tulsi_media` volumes.
+auto-created. Seeding is idempotent and controlled by `SEED_ON_START`. Database data,
+including uploaded photos, persists on the `tulsi_db_data` volume.

@@ -63,7 +63,7 @@ def engine(_database: None):
     return app_engine
 
 
-TABLES = ["stock_moves", "payments", "bill_lines", "bills", "products", "users"]
+TABLES = ["product_photos", "stock_moves", "payments", "bill_lines", "bills", "products", "users"]
 
 
 @pytest.fixture(autouse=True)

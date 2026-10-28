@@ -5,19 +5,12 @@ tests are about what must be *rejected*.
 """
 
 from io import BytesIO
-from pathlib import Path
 
-import pytest
 from PIL import Image
+from sqlalchemy import func, select
 
 from app.config import settings
-
-
-@pytest.fixture(autouse=True)
-def media_root(tmp_path, monkeypatch):
-    """Keep uploads out of the real media volume during tests."""
-    monkeypatch.setattr(settings, "media_root", str(tmp_path))
-    return tmp_path
+from app.models import ProductPhoto
 
 
 def png_bytes(size=(120, 90), color=(200, 40, 40)) -> bytes:
@@ -32,6 +25,11 @@ def jpeg_bytes(size=(120, 90)) -> bytes:
     return buffer.getvalue()
 
 
+def stored_photo_count(db) -> int:
+    db.expire_all()
+    return db.scalar(select(func.count()).select_from(ProductPhoto))
+
+
 def upload(client, product_id, headers, content, filename="photo.png", content_type="image/png"):
     return client.post(
         f"/api/products/{product_id}/photo",
@@ -40,7 +38,7 @@ def upload(client, product_id, headers, content, filename="photo.png", content_t
     )
 
 
-def test_manager_can_upload_a_photo(client, db, manager, make_product, auth_headers, media_root):
+def test_manager_can_upload_a_photo(client, db, manager, make_product, auth_headers):
     product = make_product("Masala Dosa", "90", 24)
 
     response = upload(client, product.id, auth_headers(manager, "1234"), png_bytes())
@@ -50,8 +48,11 @@ def test_manager_can_upload_a_photo(client, db, manager, make_product, auth_head
     assert photo_url.startswith("/media/products/")
     assert photo_url.endswith(".png")
 
-    stored = media_root / "products" / Path(photo_url).name
-    assert stored.exists()
+    served = client.get(photo_url)
+    assert served.status_code == 200
+    assert served.headers["content-type"] == "image/png"
+    with Image.open(BytesIO(served.content)) as image:
+        assert image.format == "PNG"
 
     db.expire_all()
     assert db.get(type(product), product.id).photo_url == photo_url
@@ -80,20 +81,18 @@ def test_jpeg_is_accepted_and_keeps_its_extension(client, manager, make_product,
     assert response.json()["photo_url"].endswith(".jpg")
 
 
-def test_large_images_are_downscaled(client, manager, make_product, auth_headers, media_root):
+def test_large_images_are_downscaled(client, manager, make_product, auth_headers):
     """A 3000px photo off a phone must not be served to a tablet as-is."""
     product = make_product("South Thali", "160", 10)
 
     response = upload(client, product.id, auth_headers(manager, "1234"), png_bytes((3000, 2000)))
 
-    stored = media_root / "products" / Path(response.json()["photo_url"]).name
-    with Image.open(stored) as saved:
+    served = client.get(response.json()["photo_url"])
+    with Image.open(BytesIO(served.content)) as saved:
         assert max(saved.size) == settings.photo_max_edge
 
 
-def test_replacing_a_photo_deletes_the_old_file(
-    client, manager, make_product, auth_headers, media_root
-):
+def test_replacing_a_photo_deletes_the_old_one(client, db, manager, make_product, auth_headers):
     product = make_product("Upma", "60", 12)
     headers = auth_headers(manager, "1234")
 
@@ -101,12 +100,13 @@ def test_replacing_a_photo_deletes_the_old_file(
     second = upload(client, product.id, headers, png_bytes(color=(10, 10, 200))).json()["photo_url"]
 
     assert first != second
-    assert not (media_root / "products" / Path(first).name).exists()
-    assert (media_root / "products" / Path(second).name).exists()
+    assert client.get(first).status_code == 404
+    assert client.get(second).status_code == 200
+    assert stored_photo_count(db) == 1
 
 
-def test_removing_a_photo_clears_the_field_and_the_file(
-    client, manager, make_product, auth_headers, media_root
+def test_removing_a_photo_clears_the_field_and_the_bytes(
+    client, db, manager, make_product, auth_headers
 ):
     product = make_product("Idly (2 pc)", "50", 40)
     headers = auth_headers(manager, "1234")
@@ -116,7 +116,8 @@ def test_removing_a_photo_clears_the_field_and_the_file(
 
     assert response.status_code == 200
     assert response.json()["photo_url"] is None
-    assert not (media_root / "products" / Path(photo_url).name).exists()
+    assert client.get(photo_url).status_code == 404
+    assert stored_photo_count(db) == 0
 
 
 # --------------------------------------------------------------------------
@@ -172,7 +173,7 @@ def test_empty_upload_is_rejected(client, manager, make_product, auth_headers):
 
 
 def test_uploaded_file_is_re_encoded_not_stored_verbatim(
-    client, manager, make_product, auth_headers, media_root
+    client, manager, make_product, auth_headers
 ):
     """A polyglot's trailing payload must not survive into the served file."""
     product = make_product("Samosa (2 pc)", "40", 4)
@@ -181,8 +182,8 @@ def test_uploaded_file_is_re_encoded_not_stored_verbatim(
     response = upload(client, product.id, auth_headers(manager, "1234"), payload)
 
     assert response.status_code == 200
-    stored = media_root / "products" / Path(response.json()["photo_url"]).name
-    assert b"<?php" not in stored.read_bytes()
+    served = client.get(response.json()["photo_url"])
+    assert b"<?php" not in served.content
 
 
 def test_photo_routes_are_manager_only(client, cashier, make_product, auth_headers):
@@ -207,20 +208,30 @@ def test_uploading_to_an_unknown_product_is_404(client, manager, auth_headers):
     assert response.status_code == 404
 
 
-def test_a_doctored_photo_url_cannot_delete_other_files(db, manager, make_product, tmp_path):
-    """Path traversal through the stored URL must not escape the media directory."""
+def test_a_doctored_photo_url_cannot_delete_other_photos(
+    client, db, manager, make_product, auth_headers
+):
+    """Only a URL the media service issued maps to a stored photo."""
     from app.services import media
 
-    victim = Path(settings.media_root) / "important.txt"
-    victim.write_text("keep me")
+    product = make_product("Masala Dosa", "90", 24)
+    real = upload(client, product.id, auth_headers(manager, "1234"), png_bytes()).json()
+    real_name = real["photo_url"].rsplit("/", 1)[1]
 
     for hostile in [
-        "/media/products/../important.txt",
-        "/media/products/../../etc/passwd",
+        f"/media/products/../{real_name}",
+        f"/media/other/{real_name}",
+        f"/media/products/{real_name}x",
         "/etc/passwd",
-        "../important.txt",
         "/media/products/",
     ]:
-        media.delete_product_photo(hostile)
+        media.delete_product_photo(db, hostile)
+    db.commit()
 
-    assert victim.exists()
+    assert stored_photo_count(db) == 1
+    assert client.get(real["photo_url"]).status_code == 200
+
+
+def test_unknown_or_malformed_photo_names_are_404(client):
+    assert client.get("/media/products/" + "0" * 32 + ".png").status_code == 404
+    assert client.get("/media/products/not-a-photo.png").status_code == 404

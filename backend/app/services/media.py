@@ -9,37 +9,46 @@ nothing here trusts the request:
   neutralises polyglot files (a valid PNG that is also a valid script);
 - only PNG/JPEG/WebP are accepted — never SVG, which can carry script and would
   run same-origin when served back;
-- the stored name is a UUID we generate, so a crafted filename can't traverse
-  out of the media directory.
+- the stored name is a UUID we generate, and lookups go by that primary key,
+  so a crafted filename or `photo_url` can't reach any other photo.
+
+The bytes live in the `product_photos` table, not on disk: the free cloud host
+wipes its filesystem on every restart, and a database row also commits in the
+same transaction as the product's `photo_url`. Nothing here commits — the
+calling service does.
 """
 
+import re
 import uuid
 from io import BytesIO
-from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
+from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.errors import ValidationError
+from app.errors import NotFoundError, ValidationError
+from app.models import ProductPhoto
 
-# Pillow format name -> (extension, save format)
+# Pillow format name -> (extension, save format, content type)
 ALLOWED_FORMATS = {
-    "PNG": ("png", "PNG"),
-    "JPEG": ("jpg", "JPEG"),
-    "WEBP": ("webp", "WEBP"),
+    "PNG": ("png", "PNG", "image/png"),
+    "JPEG": ("jpg", "JPEG", "image/jpeg"),
+    "WEBP": ("webp", "WEBP", "image/webp"),
 }
 
 PRODUCTS_DIR = "products"
 
-
-def _media_dir() -> Path:
-    path = Path(settings.media_root) / PRODUCTS_DIR
-    path.mkdir(parents=True, exist_ok=True)
-    return path
+# What a URL this module issued ends in: <32 hex>.<extension>
+_PHOTO_NAME = re.compile(r"^([0-9a-f]{32})\.(png|jpg|webp)$")
 
 
-def save_product_photo(raw: bytes) -> str:
-    """Validate, normalise and store an uploaded image. Returns its URL path."""
+def _photo_id(name: str) -> str | None:
+    match = _PHOTO_NAME.match(name)
+    return match.group(1) if match else None
+
+
+def save_product_photo(db: Session, product_id: int, raw: bytes) -> str:
+    """Validate, normalise and stage an uploaded image. Returns its URL path."""
     if not raw:
         raise ValidationError("That file is empty. Pick an image and try again.")
 
@@ -62,7 +71,7 @@ def save_product_photo(raw: bytes) -> str:
             f"{image.format or 'That format'} isn't supported. Use a PNG, JPG or WebP."
         )
 
-    extension, save_format = ALLOWED_FORMATS[image.format]
+    extension, save_format, content_type = ALLOWED_FORMATS[image.format]
 
     # A menu card is ~160px wide; anything above this is wasted bandwidth on a
     # tablet over café wifi.
@@ -71,18 +80,35 @@ def save_product_photo(raw: bytes) -> str:
     if save_format == "JPEG" and image.mode not in ("RGB", "L"):
         image = image.convert("RGB")
 
-    filename = f"{uuid.uuid4().hex}.{extension}"
-    destination = _media_dir() / filename
-    image.save(destination, format=save_format, optimize=True)
+    buffer = BytesIO()
+    image.save(buffer, format=save_format, optimize=True)
 
-    return f"{settings.media_url_prefix}/{PRODUCTS_DIR}/{filename}"
+    photo_id = uuid.uuid4().hex
+    db.add(
+        ProductPhoto(
+            id=photo_id,
+            product_id=product_id,
+            content_type=content_type,
+            data=buffer.getvalue(),
+        )
+    )
+    return f"{settings.media_url_prefix}/{PRODUCTS_DIR}/{photo_id}.{extension}"
 
 
-def delete_product_photo(photo_url: str | None) -> None:
-    """Remove a previously stored photo. Silent when there's nothing to remove.
+def get_product_photo(db: Session, name: str) -> ProductPhoto:
+    """Look up a stored photo by the file name in its URL."""
+    photo_id = _photo_id(name)
+    photo = db.get(ProductPhoto, photo_id) if photo_id else None
+    if photo is None:
+        raise NotFoundError("Photo not found")
+    return photo
 
-    Only ever deletes inside the media directory, and only a file this module
-    could have written, so a doctored `photo_url` cannot delete anything else.
+
+def delete_product_photo(db: Session, photo_url: str | None) -> None:
+    """Stage removal of a previously stored photo. Silent when there's nothing to remove.
+
+    Only a URL this module could have issued maps to a row, so a doctored
+    `photo_url` cannot delete anything else.
     """
     if not photo_url:
         return
@@ -91,15 +117,7 @@ def delete_product_photo(photo_url: str | None) -> None:
     if not photo_url.startswith(expected_prefix):
         return
 
-    name = photo_url[len(expected_prefix) :]
-    if "/" in name or "\\" in name or name in ("", ".", ".."):
-        return
-
-    target = _media_dir() / name
-    try:
-        # resolve() collapses any traversal; confirm it really landed inside.
-        if target.resolve().parent == _media_dir().resolve():
-            target.unlink(missing_ok=True)
-    except OSError:
-        # A photo we cannot delete is not worth failing the request over.
-        pass
+    photo_id = _photo_id(photo_url[len(expected_prefix) :])
+    photo = db.get(ProductPhoto, photo_id) if photo_id else None
+    if photo is not None:
+        db.delete(photo)

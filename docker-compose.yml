@@ -25,9 +25,6 @@ services:
       UPI_PAYEE_NAME: ${UPI_PAYEE_NAME:-Tulsi Tiffins}
       GST_RATE: ${GST_RATE:-0.05}
       SEED_ON_START: "true"
-      MEDIA_ROOT: /srv/media
-    volumes:
-      - tulsi_media:/srv/media
     depends_on:
       db:
         condition: service_healthy
@@ -44,4 +41,3 @@ services:
 
 volumes:
   tulsi_db_data:
-  tulsi_media:
